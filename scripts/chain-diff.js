@@ -63,6 +63,19 @@ function loadDeploymentMap(chainName) {
   return map;
 }
 
+function inspectMetadata(bytecode, label) {
+  if (!bytecode || bytecode === "0x" || bytecode.length < 8) {
+    console.log(`${label}: empty or too short`);
+    return;
+  }
+  const raw = bytecode.slice(2); // Remove 0x
+  const last4Hex = raw.slice(-4); // Last 4 hex chars = last 2 bytes (length field)
+  const claimedLen = parseInt(last4Hex, 16);
+  const totalBytes = raw.length / 2;
+  const estimatedStrippedBytes = totalBytes - claimedLen - 2; // -2 for length field itself
+  console.log(`${label}: totalBytes=${totalBytes}, claimedMetaLen=${claimedLen}, strippedWould=${estimatedStrippedBytes}, last4Hex=0x${last4Hex}`);
+}
+
 async function getCodeInfo(provider, address) {
   const code = await provider.getCode(address);
   const normalizedCode = normalizeBytecode(code);
@@ -115,6 +128,13 @@ async function main() {
         avaNormalizedHash: avaInfo.normalizedHash,
         error: "",
       });
+
+      // Debug: inspect metadata stripping for first few normalized mismatches
+      if (arbInfo.normalizedHash !== avaInfo.normalizedHash && rows.length <= 5) {
+        console.log(`\n[DEBUG] Contract: ${name}`);
+        inspectMetadata(arbInfo.rawCode, "  Arb");
+        inspectMetadata(avaInfo.rawCode, "  Ava");
+      }
     } catch (error) {
       rows.push({
         contract: name,

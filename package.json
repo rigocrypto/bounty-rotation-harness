@@ -18,6 +18,9 @@
     "proof:package": "ts-node scripts/generateProofPackage.ts",
     "demo:proof": "ts-node scripts/demoProof.ts",
     "bounty-rotation": "npm run test:gmx-exploit-search:extended && npm run triage:ci && npm run dashboard -- --db outputs/metrics/results.db --out outputs/metrics/dashboard.html",
+    "managed:run": "ts-node scripts/managed/runClient.ts",
+    "managed:scheduler": "ts-node scripts/managed/scheduler.ts",
+    "managed:serve": "ts-node scripts/managed/serveDashboards.ts",
     "generate-immunefi": "ts-node scripts/generateImmunefiReport.ts",
     "triage": "ts-node scripts/triage.ts",
     "triage:ci": "ts-node scripts/triage.ts --dir exploit-proofs --out outputs/triage/triage-result.json",
@@ -64,6 +67,7 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.2",
     "@types/better-sqlite3": "^7.6.11",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.10.2",
     "cross-env": "^10.1.0",
     "fast-check": "^3.23.2",
@@ -83,6 +87,7 @@
     "ethers": "^6.16.0",
     "express": "^4.21.2",
     "glob": "^10.4.5",
+    "node-cron": "^4.2.1",
     "nodemailer": "^6.10.1",
     "stripe": "^18.2.1"
   },

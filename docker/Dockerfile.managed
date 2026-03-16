@@ -1,0 +1,15 @@
+FROM node:20-bullseye
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+ENV NODE_ENV=production
+ENV MANAGED_PORT=8787
+
+EXPOSE 8787
+
+CMD ["sh", "-c", "npm run managed:scheduler -- --client all & npm run managed:serve"]

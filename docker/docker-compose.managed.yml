@@ -1,0 +1,12 @@
+services:
+  managed-runner:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.managed
+    ports:
+      - "8787:8787"
+    env_file:
+      - ../.env.managed
+    volumes:
+      - ../outputs:/app/outputs
+    restart: unless-stopped

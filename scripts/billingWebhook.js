@@ -361,9 +361,6 @@ function recoverInprogressJobs() {
 
 async function processNextJob(processedEvents, processedSessions) {
   if (processing) return;
-  if (!acquireLock()) {
-    return;
-  }
   processing = true;
 
   try {
@@ -471,12 +468,18 @@ async function processNextJob(processedEvents, processedSessions) {
     });
   } finally {
     processing = false;
-    releaseLock();
   }
 }
 
 function startServer() {
   ensureDirs();
+  if (!acquireLock()) {
+    log("error", "worker.lock_unavailable", {
+      lockPath: LOCK_PATH
+    });
+    process.exit(1);
+  }
+
   const processedEvents = loadProcessedSet(PROCESSED_EVENTS_PATH);
   const processedSessions = loadProcessedSet(PROCESSED_SESSIONS_PATH);
 

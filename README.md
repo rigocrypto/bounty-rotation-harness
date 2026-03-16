@@ -208,5 +208,22 @@ See full details in the repo docs (and `docs/sales-launch-kit.md` if present).
 
 ---
 
-### Optional: Add a “Customer FAQ” section?
-If you want, I can add a short FAQ (e.g., “Can my team run it ourselves?”, “What access do you need?”, “Where are artifacts stored?”, “How do you handle NDA?”) and tailor the pricing copy to your exact offer.
+## Customer FAQ
+
+### Can my team run this ourselves?
+Yes. The repository is OSS and can be run internally with your own archive RPC and CI setup. Many teams start self-hosted, then move to managed mode when they want SLA-backed operations.
+
+### What access do you need for managed service?
+At minimum, archive RPC endpoints and preferred alert channels (Slack/email). You keep custody of your contracts and keys. Managed mode focuses on read-heavy monitoring, deterministic evidence generation, and reporting.
+
+### Where are artifacts stored?
+Artifacts are written per run under `outputs/managed/<client>/<date>/<runId>/` and include logs, triage output, dashboard files, and proof/report packages when present.
+
+### How do you handle NDAs and private findings?
+Findings and artifacts can be handled under NDA terms with private delivery paths. Public disclosure is never assumed; disclosure timing and channels are coordinated with your team.
+
+### Is this a replacement for a full manual audit?
+No. This system is built for deterministic monitoring, regression detection, and proof packaging. It complements (but does not replace) manual review by experienced auditors.
+
+### How quickly can we onboard?
+Basic onboarding is typically same-day for teams with working archive RPC access. Custom invariants, white-label reporting, and enterprise integrations may require additional setup time.

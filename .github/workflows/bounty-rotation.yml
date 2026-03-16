@@ -237,20 +237,24 @@ jobs:
           echo "triage_exit=${TRIAGE_EXIT}" >> "$GITHUB_OUTPUT"
 
           if [ ! -f outputs/triage/triage-result.json ]; then
-            cat > outputs/triage/triage-result.json <<'EOF'
-            {
-              "schema_version": 1,
-              "triage_tool_version": "unknown",
-              "eth_price_used": "3400",
-              "eth_price_source": "fallback",
-              "has_critical": false,
-              "has_high": false,
-              "total_proofs": 0,
-              "total_usd_impact": "$0.00",
-              "summary_text": "No proofs detected.",
-              "proofs": []
-            }
-            EOF
+            jq -n \
+              --arg triage_tool_version "unknown" \
+              --arg eth_price_used "3400" \
+              --arg eth_price_source "fallback" \
+              --arg total_usd_impact "$0.00" \
+              --arg summary_text "No proofs detected." \
+              '{
+                schema_version: 1,
+                triage_tool_version: $triage_tool_version,
+                eth_price_used: $eth_price_used,
+                eth_price_source: $eth_price_source,
+                has_critical: false,
+                has_high: false,
+                total_proofs: 0,
+                total_usd_impact: $total_usd_impact,
+                summary_text: $summary_text,
+                proofs: []
+              }' > outputs/triage/triage-result.json
           fi
 
       - name: Validate triage schema version
@@ -292,11 +296,11 @@ jobs:
           echo "has_critical=$(cat .outputs/has_critical)" >> "$GITHUB_OUTPUT"
           echo "has_high=$(cat .outputs/has_high)" >> "$GITHUB_OUTPUT"
           echo "proof_count=$(cat .outputs/proof_count)" >> "$GITHUB_OUTPUT"
-          {
-            echo "summary_text<<EOF"
-            cat .outputs/summary_text
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          SUMMARY_TEXT=$(cat .outputs/summary_text)
+          SUMMARY_TEXT="${SUMMARY_TEXT//'%'/'%25'}"
+          SUMMARY_TEXT="${SUMMARY_TEXT//$'\n'/'%0A'}"
+          SUMMARY_TEXT="${SUMMARY_TEXT//$'\r'/'%0D'}"
+          echo "summary_text=${SUMMARY_TEXT}" >> "$GITHUB_OUTPUT"
 
       - name: Upload triage result
         if: always()

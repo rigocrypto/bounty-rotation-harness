@@ -11,6 +11,7 @@ Use only two docs for current execution state:
 - Gate B (`executeOrder` critical path): `PASS` when `GMX_ALLOW_AVA_ORACLE_EXECUTE=1`.
 - Gate C (one Oracle source diff): `PARTIAL`; Avalanche source fetched, Arbitrum fetch blocked by deprecated endpoint / missing V2 key.
 - Gate D (Slither reentrancy/delegatecall pass): completed and triaged; highest-signal findings are access-control constrained.
+- Real exploit probe (unauthorized calls): `PASS`; OrderHandler/WithdrawalHandler privileged execute paths revert for non-privileged signer.
 
 ## Evidence Files
 

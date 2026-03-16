@@ -125,12 +125,36 @@ Oracle detector mix (important):
 - Oracle-scoped findings are only `reentrancy-benign`, `reentrancy-events`, and `reentrancy-no-eth`.
 - No Oracle-scoped `arbitrary-send-*` findings in this run.
 
+## Real Vulnerability Probe (Required)
+
+Deterministic probe added:
+
+- [test/gmx-invariants/accessControlProbe.spec.ts](test/gmx-invariants/accessControlProbe.spec.ts)
+
+Execution command:
+
+```bash
+npx cross-env GMX_ENABLE_REAL_MUTATIONS=true GMX_CHAIN=avalanche AVALANCHE_FORK_BLOCK=80400000 hardhat test test/gmx-invariants/accessControlProbe.spec.ts --network hardhat --show-stack-traces
+```
+
+Latest result:
+
+- `OrderHandler.executeOrder` unauthorized call: blocked (`reverted`) ✅
+- `WithdrawalHandler.executeWithdrawal` unauthorized call: blocked (`reverted`) ✅
+- `Router.pluginTransfer` probe: skipped unless `GMX_ROUTER_ADDRESS` is provided in env.
+
+Interpretation:
+
+- High-risk privileged execution entrypoints are not callable by an arbitrary signer under current fork state.
+- This is a direct exploit probe result (not just static-analysis inference).
+
 ## Minimal Ship Checklist
 
 1. Keep Gate A/B commands pinned with `GMX_ALLOW_AVA_ORACLE_EXECUTE=1` for deterministic avalanche execution.
 2. Complete Gate C by fetching Arbitrum OracleStore source through a supported V2 API key path.
 3. Confirm proxy/implementation mapping for compared Oracle addresses after Arbitrum fetch is restored.
-4. Continue triage on any remaining non-permissioned high-signal static findings.
+4. Optionally set `GMX_ROUTER_ADDRESS` and run router plugin probe branch in `accessControlProbe.spec.ts`.
+5. Do not submit any report unless a concrete vulnerability + impact + reproducible PoC is demonstrated.
 
 ## Notes
 

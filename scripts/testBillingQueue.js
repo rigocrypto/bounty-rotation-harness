@@ -5,6 +5,10 @@ const http = require("http");
 const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
+const { execSync } = require("child_process");
+
+const gitSha = execSync("git rev-parse --short HEAD", { stdio: "pipe" }).toString().trim();
+console.log(`[test runner] Running commit: ${gitSha}`);
 
 const SCENARIO_WAIT_MS = Math.max(500, Number(process.env.BILLING_TEST_TIMEOUT_MS || 1500));
 

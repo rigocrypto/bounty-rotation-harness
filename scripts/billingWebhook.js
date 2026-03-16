@@ -264,34 +264,47 @@ function runDeliverable(job) {
 }
 
 function acquireLock() {
-  if (fs.existsSync(LOCK_PATH)) {
+  let lastReason = "unknown";
+
+  for (let i = 0; i < 5; i++) {
+    if (fs.existsSync(LOCK_PATH)) {
+      try {
+        const pid = parseInt(fs.readFileSync(LOCK_PATH, "utf8").trim(), 10);
+        if (pid === process.pid) {
+          return true;
+        }
+        process.kill(pid, 0); // throws if PID is dead
+        return false; // lock held by a live process
+      } catch (_) {
+        // Stale lock — previous process is dead
+        const stalePid = Number.parseInt(fs.readFileSync(LOCK_PATH, "utf8").trim(), 10);
+        try { fs.unlinkSync(LOCK_PATH); } catch (_2) { /* noop */ }
+        log("warn", "lock.stale_cleared", { stalePid });
+      }
+    }
+
     try {
-      const pid = parseInt(fs.readFileSync(LOCK_PATH, "utf8").trim(), 10);
-      process.kill(pid, 0); // throws if PID is dead
-      return false; // still running
-    } catch (_) {
-      // Stale lock — previous process is dead
-      const stalePid = Number.parseInt(fs.readFileSync(LOCK_PATH, "utf8").trim(), 10);
-      try { fs.unlinkSync(LOCK_PATH); } catch (_2) { /* noop */ }
-      log("warn", "lock.stale_cleared", { stalePid });
+      fs.writeFileSync(LOCK_PATH, `${process.pid}\n`, { flag: "wx" });
+      log("info", "worker.lock_acquired", {
+        lockPath: LOCK_PATH
+      });
+      return true;
+    } catch (err) {
+      lastReason = (err && typeof err === "object" && "code" in err && err.code)
+        || (err && typeof err === "object" && "message" in err && err.message)
+        || String(err);
+      if (lastReason === "EEXIST") {
+        continue;
+      }
+      break;
     }
   }
-  try {
-    fs.writeFileSync(LOCK_PATH, `${process.pid}\n`);
-    log("info", "worker.lock_acquired", {
-      lockPath: LOCK_PATH
-    });
-    return true;
-  } catch (err) {
-    const reason = (err && typeof err === "object" && "code" in err && err.code)
-      || (err && typeof err === "object" && "message" in err && err.message)
-      || String(err);
-    log("warn", "worker.lock_acquire_failed", {
-      lockPath: LOCK_PATH,
-      reason
-    });
-    return false;
-  }
+
+  log("warn", "worker.lock_acquire_failed", {
+    lockPath: LOCK_PATH,
+    reason: lastReason
+  });
+  return false;
 }
 
 function releaseLock() {

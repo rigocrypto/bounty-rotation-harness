@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { timingSafeEqual } from "crypto";
 
 import express, { type Request, type Response, type NextFunction } from "express";
 
@@ -39,13 +40,18 @@ function latestRunDir(clientId: string): string | undefined {
   return undefined;
 }
 
+function safeTokenCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
 function requireTokenForClient(clientId: string, token: string | undefined): boolean {
   const cfg = getClientConfig(clientId);
   const envName = cfg.auth.dashboardTokenEnv;
   if (!envName) return false;
   const expected = process.env[envName];
-  if (!expected) return false;
-  return token === expected;
+  if (!expected || !token) return false;
+  return safeTokenCompare(token, expected);
 }
 
 function authMiddleware(req: Request, res: Response, next: NextFunction): void {
@@ -63,9 +69,10 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
   }
 
   if (req.path === "/clients") {
-    const ok = listClientConfigs().some((cfg) => {
+    const ok = token !== undefined && listClientConfigs().some((cfg) => {
       const envName = cfg.auth.dashboardTokenEnv;
-      return Boolean(envName && process.env[envName] && process.env[envName] === token);
+      const expected = envName ? process.env[envName] : undefined;
+      return Boolean(expected && safeTokenCompare(token, expected));
     });
 
     if (!ok) {

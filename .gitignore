@@ -31,6 +31,10 @@ gmx-synthetics.worktrees/
 # Node
 node_modules/
 
+# Client configs — only example is tracked; real client configs must stay local
+config/clients/*.config.ts
+!config/clients/example.config.ts
+
 # Local secrets
 .env
 .env.*

@@ -10,6 +10,11 @@ COPY . .
 ENV NODE_ENV=production
 ENV MANAGED_PORT=8787
 
+RUN addgroup --system gmxaudit \
+    && adduser --system --ingroup gmxaudit gmxaudit \
+    && chown -R gmxaudit:gmxaudit /app
+USER gmxaudit
+
 EXPOSE 8787
 
 CMD ["sh", "-c", "npm run managed:scheduler -- --client all & npm run managed:serve"]

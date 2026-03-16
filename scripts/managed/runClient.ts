@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
+import { randomUUID } from "crypto";
 
 import { getClientConfig } from "../../config/clients";
 
@@ -12,10 +13,14 @@ type CliArgs = {
   packageLimit: number;
 };
 
+type RunStatus = "success" | "partial" | "failed";
+
 type RunSummary = {
   clientId: string;
   timestamp: string;
   runId: string;
+  status: RunStatus;
+  rotationErrors: Array<{ chain: string; error: string }>;
   tier: string;
   chains: string[];
   chainRuns: Array<{
@@ -83,7 +88,7 @@ function toIsoDate(now = new Date()): string {
 }
 
 function toRunId(now = new Date()): string {
-  return now.toISOString().replace(/[:.]/g, "-");
+  return `${now.toISOString().replace(/[:.]/g, "-")}-${randomUUID().slice(0, 8)}`;
 }
 
 function ensureDir(dirPath: string): void {
@@ -308,24 +313,29 @@ async function sendAlerts(summary: RunSummary, slackWebhookEnv?: string, emailTo
   if (slackWebhookEnv) {
     const webhook = process.env[slackWebhookEnv];
     if (webhook) {
-      try {
-        const response = await fetch(webhook, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: `${subject}\n${summary.artifacts.runDir}` })
-        });
-        fs.writeFileSync(
-          path.join(alertsDir, "slack.json"),
-          JSON.stringify({ ok: response.ok, status: response.status }, null, 2),
-          "utf8"
-        );
-      } catch (error) {
-        fs.writeFileSync(
-          path.join(alertsDir, "slack-error.txt"),
-          (error as Error).message,
-          "utf8"
-        );
+      let lastStatus = 0;
+      let delivered = false;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const res = await fetch(webhook, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: `${subject}\n${summary.artifacts.runDir}` })
+          });
+          lastStatus = res.status;
+          if (res.ok) { delivered = true; break; }
+          console.warn(`[alert] Slack attempt ${attempt + 1} failed: ${res.status}`);
+        } catch (err) {
+          console.warn(`[alert] Slack attempt ${attempt + 1} error: ${(err as Error).message}`);
+        }
+        if (attempt < 2) await new Promise<void>((r) => setTimeout(r, 1000 * (attempt + 1)));
       }
+      fs.writeFileSync(
+        path.join(alertsDir, delivered ? "slack.json" : "slack-error.txt"),
+        JSON.stringify({ delivered, status: lastStatus }, null, 2),
+        "utf8"
+      );
+      if (!delivered) console.error("[alert] All Slack retries exhausted — alert NOT delivered");
     }
   }
 
@@ -336,6 +346,23 @@ async function sendAlerts(summary: RunSummary, slackWebhookEnv?: string, emailTo
       body
     };
     fs.writeFileSync(path.join(alertsDir, "email-sink.json"), JSON.stringify(sink, null, 2), "utf8");
+  }
+}
+
+function pruneOldRuns(clientDir: string, keepDays: number): void {
+  const cutoff = Date.now() - keepDays * 24 * 60 * 60 * 1000;
+  if (!fs.existsSync(clientDir)) return;
+  for (const dateDir of fs.readdirSync(clientDir)) {
+    const fullPath = path.join(clientDir, dateDir);
+    try {
+      const stat = fs.statSync(fullPath);
+      if (stat.isDirectory() && stat.mtimeMs < cutoff) {
+        fs.rmSync(fullPath, { recursive: true });
+        console.log(`[prune] Removed old run dir: ${dateDir}`);
+      }
+    } catch {
+      // skip unreadable entries
+    }
   }
 }
 
@@ -372,10 +399,29 @@ export async function executeClientRun(args: CliArgs): Promise<RunSummary> {
       })
     : {};
 
+  const failedRuns = chainRuns.filter((r) => r.status === "failed");
+  const ranRuns = chainRuns.filter((r) => r.status !== "skipped_missing_rpc");
+  const runStatus: RunStatus =
+    failedRuns.length === 0
+      ? ranRuns.length > 0
+        ? "success"
+        : "failed"
+      : failedRuns.length < ranRuns.length
+        ? "partial"
+        : "failed";
+  const rotationErrors = failedRuns.map((r) => ({
+    chain: r.chain,
+    error: r.message ?? `exit ${r.exitCode ?? "?"}`
+  }));
+
+  const toRel = (abs: string) => path.relative(process.cwd(), abs).replace(/\\/g, "/");
+
   const summary: RunSummary = {
     clientId: client.id,
     timestamp,
     runId,
+    status: runStatus,
+    rotationErrors,
     tier: client.tiers,
     chains,
     chainRuns,
@@ -390,18 +436,20 @@ export async function executeClientRun(args: CliArgs): Promise<RunSummary> {
       ethPriceSource: triage.eth_price_source
     },
     artifacts: {
-      runDir,
-      triageResultPath: triagePath,
-      dashboardPath: path.join(runDir, "dashboard.html"),
-      dbPath: path.join(runDir, "results.db"),
-      proofPackageDir: packaged.proofPackageDir,
-      reportDir: packaged.reportDir
+      runDir: toRel(runDir),
+      triageResultPath: toRel(triagePath),
+      dashboardPath: toRel(path.join(runDir, "dashboard.html")),
+      dbPath: toRel(path.join(runDir, "results.db")),
+      proofPackageDir: packaged.proofPackageDir ? toRel(packaged.proofPackageDir) : undefined,
+      reportDir: packaged.reportDir ? toRel(packaged.reportDir) : undefined
     }
   };
 
   fs.writeFileSync(path.join(runDir, "run-summary.json"), `${JSON.stringify(summary, null, 2)}\n`, "utf8");
 
   await sendAlerts(summary, client.alerts.slackWebhookEnv, client.alerts.emailTo);
+
+  pruneOldRuns(path.join(process.cwd(), "outputs", "managed", client.id), client.retentionDays ?? 30);
 
   return summary;
 }

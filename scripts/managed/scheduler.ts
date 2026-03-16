@@ -20,6 +20,8 @@ function parseArgs(argv: string[]): SchedulerArgs {
   };
 }
 
+const runningClients = new Set<string>();
+
 async function scheduleClient(clientId: string, priceUsd?: string): Promise<void> {
   const config = getClientConfig(clientId);
   if (!cron.validate(config.scheduleCron)) {
@@ -27,6 +29,11 @@ async function scheduleClient(clientId: string, priceUsd?: string): Promise<void
   }
 
   cron.schedule(config.scheduleCron, async () => {
+    if (runningClients.has(clientId)) {
+      console.warn(`[managed:scheduler] Skipping ${clientId} — previous run still active`);
+      return;
+    }
+    runningClients.add(clientId);
     try {
       await executeClientRun({
         clientId,
@@ -37,6 +44,8 @@ async function scheduleClient(clientId: string, priceUsd?: string): Promise<void
       console.log(`[managed:scheduler] completed run for ${clientId}`);
     } catch (error) {
       console.error(`[managed:scheduler] failed run for ${clientId}: ${(error as Error).message}`);
+    } finally {
+      runningClients.delete(clientId);
     }
   });
 

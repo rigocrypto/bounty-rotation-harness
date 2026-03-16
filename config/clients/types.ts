@@ -15,4 +15,5 @@ export type ClientConfig = {
     dashboardTokenEnv?: string;
   };
   tiers: ClientTier;
+  retentionDays?: number;
 };

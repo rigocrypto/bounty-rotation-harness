@@ -1,3 +1,6 @@
+// ⚠️  Real client configs (non-example) must NOT be committed.
+// .gitignore enforces: config/clients/*.config.ts  !config/clients/example.config.ts
+
 import fs from "fs";
 import path from "path";
 

@@ -1,0 +1,42 @@
+name: Billing Queue Main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  billing-queue-tests-main:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Print SHA + status
+        run: |
+          echo "=== CI DEBUG ==="
+          echo "Checked out SHA: $(git rev-parse --short HEAD)"
+          echo "Branch: $(git branch --show-current)"
+          echo "Top 5 commits:"
+          git log --oneline -5
+          echo "=================="
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Billing Queue Harness
+        env:
+          BILLING_TEST_TIMEOUT_MS: 8000
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+        run: npm run billing:test

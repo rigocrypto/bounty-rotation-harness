@@ -48,11 +48,39 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run GMX Invariant Harness
+      - name: Run GMX Invariant Harness (pinned block with latest fallback)
         env:
           ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-          FORK_BLOCK: latest
-        run: npm run test:gmx-invariants
+          GMX_FORK_BLOCK: ${{ secrets.GMX_FORK_BLOCK }}
+        run: |
+          set -euo pipefail
+
+          run_invariants() {
+            local block="$1"
+            echo "Running gmx-invariants with FORK_BLOCK=${block}"
+            FORK_BLOCK="$block" npm run test:gmx-invariants 2>&1 | tee /tmp/gmx-invariants.log
+          }
+
+          if [ -n "${GMX_FORK_BLOCK:-}" ] && [ "${GMX_FORK_BLOCK}" != "latest" ]; then
+            set +e
+            run_invariants "${GMX_FORK_BLOCK}"
+            status=$?
+            set -e
+
+            if [ $status -eq 0 ]; then
+              exit 0
+            fi
+
+            if grep -Eiq "historical state .* not available|missing trie node|state is not available|header not found|ancient block" /tmp/gmx-invariants.log; then
+              echo "Pinned fork block is not available from RPC archive state. Retrying with latest."
+            else
+              exit $status
+            fi
+          else
+            echo "GMX_FORK_BLOCK is not configured (or set to latest); using latest block."
+          fi
+
+          run_invariants "latest"
 
   billing-queue-tests:
     runs-on: ubuntu-latest

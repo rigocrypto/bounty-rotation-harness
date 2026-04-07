@@ -51,7 +51,7 @@ jobs:
       - name: Run GMX Invariant Harness
         env:
           ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
-          FORK_BLOCK: ${{ secrets.GMX_FORK_BLOCK }}
+          FORK_BLOCK: latest
         run: npm run test:gmx-invariants
 
   billing-queue-tests:

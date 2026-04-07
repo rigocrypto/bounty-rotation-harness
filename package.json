@@ -109,7 +109,7 @@
     "express": "^4.21.2",
     "glob": "^10.4.5",
     "node-cron": "^4.2.1",
-    "nodemailer": "^7.0.13",
+    "nodemailer": "^8.0.4",
     "stripe": "^18.2.1"
   },
   "type": "commonjs"

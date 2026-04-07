@@ -8,6 +8,63 @@ import { getClientConfig, listClientConfigs } from "../../config/clients";
 
 const app = express();
 const PORT = Number(process.env.MANAGED_PORT || 8787);
+const MANAGED_OUTPUT_ROOT = path.resolve(process.cwd(), "outputs", "managed");
+const CLIENT_IDS = new Set(listClientConfigs().map((cfg) => cfg.id));
+const RATE_LIMIT_WINDOW_MS = Number(process.env.MANAGED_RATE_LIMIT_WINDOW_MS || 60_000);
+const RATE_LIMIT_MAX_REQUESTS = Number(process.env.MANAGED_RATE_LIMIT_MAX || 60);
+
+type RateLimitBucket = {
+  count: number;
+  resetAt: number;
+};
+
+const rateLimitBuckets = new Map<string, RateLimitBucket>();
+
+function isAllowedClientId(clientId: string): boolean {
+  return /^[a-zA-Z0-9_-]+$/.test(clientId) && CLIENT_IDS.has(clientId);
+}
+
+function resolveClientBase(clientId: string): string | undefined {
+  if (!isAllowedClientId(clientId)) {
+    return undefined;
+  }
+
+  const base = path.resolve(MANAGED_OUTPUT_ROOT, clientId);
+  if (base !== MANAGED_OUTPUT_ROOT && !base.startsWith(`${MANAGED_OUTPUT_ROOT}${path.sep}`)) {
+    return undefined;
+  }
+
+  return base;
+}
+
+function applyRateLimit(req: Request, res: Response, next: NextFunction): void {
+  const now = Date.now();
+  const key = `${req.ip || "unknown"}:${req.path}`;
+  const existing = rateLimitBuckets.get(key);
+
+  if (!existing || now >= existing.resetAt) {
+    rateLimitBuckets.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    next();
+    return;
+  }
+
+  if (existing.count >= RATE_LIMIT_MAX_REQUESTS) {
+    res.status(429).json({ error: "Too many requests" });
+    return;
+  }
+
+  existing.count += 1;
+  next();
+}
+
+function validateClientParam(req: Request, res: Response, next: NextFunction): void {
+  const clientId = req.params.id;
+  if (!clientId || !isAllowedClientId(clientId)) {
+    res.status(404).json({ error: "Client not found" });
+    return;
+  }
+  next();
+}
 
 function getToken(req: Request): string | undefined {
   const auth = req.header("authorization") || "";
@@ -16,7 +73,8 @@ function getToken(req: Request): string | undefined {
 }
 
 function latestRunDir(clientId: string): string | undefined {
-  const base = path.join(process.cwd(), "outputs", "managed", clientId);
+  const base = resolveClientBase(clientId);
+  if (!base) return undefined;
   if (!fs.existsSync(base)) return undefined;
 
   const days = fs
@@ -46,7 +104,17 @@ function safeTokenCompare(a: string, b: string): boolean {
 }
 
 function requireTokenForClient(clientId: string, token: string | undefined): boolean {
-  const cfg = getClientConfig(clientId);
+  if (!isAllowedClientId(clientId)) {
+    return false;
+  }
+
+  let cfg;
+  try {
+    cfg = getClientConfig(clientId);
+  } catch {
+    return false;
+  }
+
   const envName = cfg.auth.dashboardTokenEnv;
   if (!envName) return false;
   const expected = process.env[envName];
@@ -85,6 +153,7 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
 }
 
 app.use(authMiddleware);
+app.use(applyRateLimit);
 
 app.get("/clients", (_req, res) => {
   const clients = listClientConfigs().map((cfg) => ({
@@ -97,9 +166,14 @@ app.get("/clients", (_req, res) => {
   res.json(clients);
 });
 
-app.get("/client/:id/runs", (req, res) => {
+app.get("/client/:id/runs", validateClientParam, (req, res) => {
   const clientId = req.params.id;
-  const base = path.join(process.cwd(), "outputs", "managed", clientId);
+  const base = resolveClientBase(clientId);
+  if (!base) {
+    res.status(404).json({ error: "Client not found" });
+    return;
+  }
+
   if (!fs.existsSync(base)) {
     res.json([]);
     return;
@@ -120,7 +194,7 @@ app.get("/client/:id/runs", (req, res) => {
   res.json(runs);
 });
 
-app.get("/client/:id/latest", (req, res) => {
+app.get("/client/:id/latest", validateClientParam, (req, res) => {
   const clientId = req.params.id;
   const runDir = latestRunDir(clientId);
   if (!runDir) {
@@ -137,7 +211,7 @@ app.get("/client/:id/latest", (req, res) => {
   res.sendFile(dashboardPath);
 });
 
-app.get("/client/:id/latest/summary", (req, res) => {
+app.get("/client/:id/latest/summary", validateClientParam, (req, res) => {
   const clientId = req.params.id;
   const runDir = latestRunDir(clientId);
   if (!runDir) {

@@ -1,73 +1,129 @@
 # gmx-audit
 
-Deterministic GMX security harness for **invariant hunting**, **continuous regression**, and **Immunefi-ready proof packaging** (plus a managed service option for protocol teams).
+Deterministic GMX security harness for invariant hunting, continuous regression, and Immunefi-ready proof packaging — with an optional managed service for protocol teams.
 
-[![Bounty Rotation CI](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/bounty-rotation.yml/badge.svg?branch=main)](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/bounty-rotation.yml)
-[![Audit Batch CI](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/audit-batch.yml/badge.svg?branch=main)](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/audit-batch.yml)
-[![Secret Scan](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/secret-scan.yml/badge.svg?branch=main)](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/secret-scan.yml)
+---
 
-**Docs**
-- Continuous operations: `docs/continuous-security.md`
-- Managed service (hosted/retainer): `docs/managed-service.md`
-- Security policy: `SECURITY.md`
-- Contributing: `CONTRIBUTING.md`
-- License: MIT (`LICENSE`)
+## Docs
+
+* Continuous operations: `docs/continuous-security.md`
+* Managed service: `docs/managed-service.md`
+* Security policy: `SECURITY.md`
+* Contributing: `CONTRIBUTING.md`
+* License: MIT (`LICENSE`)
 
 ---
 
 ## Who this is for
 
-### Protocol teams (GMX forks / perpetuals / DeFi)
-You want **continuous security monitoring** you can explain to non-security stakeholders:
-- nightly regression scans
-- “Security Score” trend
-- alerts when a real economic invariant breaks
-- reproducible evidence bundles
+### Protocol teams (GMX forks / perps / DeFi)
 
-### Hunters / auditors
-You want:
-- deterministic fork-based runs over historical blocks
-- automated **triage + severity**
-- **proof package** and **Immunefi-ready report** in minutes (demo or real)
+You need security monitoring that's **continuous, explainable, and actionable**:
 
-### Enterprise security & ops
-You want:
-- repeatable runs, stored artifacts, and audit trail
-- minimal manual effort
-- clear outputs to drive escalation
+* Nightly regression scans
+* A trackable "Security Score"
+* Alerts when real economic invariants break
+* Reproducible evidence bundles for escalation
 
 ---
 
-## What you get (customer value)
+### Hunters / auditors
 
-### 1) Deterministic proof -> Immunefi-ready package
-When a run yields a **bounty candidate**, you get a reproducible bundle:
-- `proof.json` + `summary.json`
-- `repro.sh` + `repro.ps1` (exact commands)
-- `immunefi-report.md` (ready to submit)
-- economic impact shown with **signed USD** (`+$` attacker gain / `-$` pool loss) and **ETH price basis**
+You want:
 
-### 2) Continuous regression + “Security Score”
+* Deterministic fork-based execution on historical blocks
+* Automated triage and severity classification
+* Proof packaging + Immunefi-ready reports in minutes
+
+---
+
+### Enterprise security / ops
+
+You care about:
+
+* Repeatable runs with stored artifacts
+* Minimal manual overhead
+* Clear outputs for escalation and reporting
+
+---
+
+## What you get
+
+### 1) Deterministic proof → submission-ready package
+
+When a run produces a valid candidate, you get a fully reproducible bundle:
+
+* `proof.json` + `summary.json`
+* `repro.sh` + `repro.ps1` (exact commands)
+* `immunefi-report.md` (ready to submit)
+
+Includes:
+
+* Signed USD impact (`+$ attacker gain / -$ protocol loss`)
+* ETH price basis recorded at runtime
+
+### 2) Continuous regression + Security Score
+
 For ongoing monitoring:
-- dashboard HTML (no CDN) + SQLite history
-- trend chart over recent runs
-- filters (chain, blocks, proofs-only, failures-only)
-- score formula is deterministic and client-friendly
+
+* Static HTML dashboard (no CDN)
+* SQLite-backed history
+* Trend charts across runs
+* Filters (chain, block, proofs-only, failures-only)
+
+The score is deterministic and designed to be understandable by non-security stakeholders.
 
 ### 3) CI automation (multi-chain)
-GitHub Actions workflows support:
-- scheduled runs
-- triage output contract (`schema_version`)
-- safe dedupe behavior (content hash vs identity)
-- secret scanning on PRs
 
-### 4) Managed/Hosted Service Mode (Option B)
-If you don’t want to operate it:
-- multi-client config
-- scheduled execution
-- hosted token-protected dashboards
-- alerts + artifacts per client run
-- retention pruning + retries + overlap locks
+GitHub Actions workflows provide:
+
+* Scheduled runs
+* Versioned triage output (`schema_version`)
+* Safe deduplication (content hash vs identity)
+* Secret scanning on PRs
+
+### 4) Managed / hosted mode (optional)
+
+If you don't want to operate the system:
+
+* Multi-client configuration
+* Scheduled execution
+* Token-protected dashboards
+* Alerts + artifacts per run
+* Retention pruning, retries, overlap locks
+
+---
+
+## Real-World Coverage
+
+This framework has been validated against live DeFi systems under real market conditions.
+
+Tested against production protocols, including:
+
+### Moonwell (Compound v2 fork on Base)
+
+Coverage includes:
+
+* Comptroller risk checks (liquidity / shortfall)
+* Oracle integration (Chainlink feeds)
+* Liquidation flows (close factor, seize math)
+* Stale price edge cases (missing freshness validation)
+
+Example finding class:
+
+* Missing oracle freshness window allowing overborrowing and persistent insolvency
+
+Proof characteristics:
+
+Observed impact (example run):
+
+* Debt: ~$5.49M
+* Collateral: ~$2.39M
+* Deficit: ~$3.09M
+
+Liquidation reduces risk but does not restore solvency.
+
+See `outputs/` for proof bundles and reproducible test cases.
 
 ---
 
@@ -227,3 +283,6 @@ No. This system is built for deterministic monitoring, regression detection, and
 
 ### How quickly can we onboard?
 Basic onboarding is typically same-day for teams with working archive RPC access. Custom invariants, white-label reporting, and enterprise integrations may require additional setup time.
+
+
+

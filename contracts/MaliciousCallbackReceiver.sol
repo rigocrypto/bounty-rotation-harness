@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-import "../gmx-synthetics/contracts/callback/IOrderCallbackReceiver.sol";
-import "../gmx-synthetics/contracts/callback/IGasFeeCallbackReceiver.sol";
-import "../gmx-synthetics/contracts/event/EventUtils.sol";
+import "./interfaces/gmx/IOrderCallbackReceiver.sol";
+import "./interfaces/gmx/IGasFeeCallbackReceiver.sol";
+import "./interfaces/gmx/EventUtils.sol";
 
 /**
  * MaliciousCallbackReceiver
@@ -35,14 +35,15 @@ contract MaliciousCallbackReceiver is IOrderCallbackReceiver, IGasFeeCallbackRec
 
     function afterOrderExecution(
         bytes32 key,
-        EventUtils.EventLogData memory /* order */,
+        EventUtils.EventLogData memory,
+        /* order */
         EventUtils.EventLogData memory /* eventData */
-    ) external {
+    )
+        external
+    {
         afterOrderExecutionAttempted = true;
         // Attempt to reenter: call cancelOrder on the same order key during execution callback
-        (bool success, ) = orderHandler.call(
-            abi.encodeWithSignature("cancelOrder(bytes32)", targetKey)
-        );
+        (bool success,) = orderHandler.call(abi.encodeWithSignature("cancelOrder(bytes32)", targetKey));
         if (success) {
             afterOrderExecutionReentered = true;
         }
@@ -50,37 +51,43 @@ contract MaliciousCallbackReceiver is IOrderCallbackReceiver, IGasFeeCallbackRec
 
     function afterOrderCancellation(
         bytes32 key,
-        EventUtils.EventLogData memory /* order */,
+        EventUtils.EventLogData memory,
+        /* order */
         EventUtils.EventLogData memory /* eventData */
-    ) external {
+    )
+        external
+    {
         afterOrderCancellationAttempted = true;
         // Attempt to reenter: call createOrder during cancellation callback
         // This is harder to test directly without full params, so we just try cancelOrder on another key
-        (bool success, ) = orderHandler.call(
-            abi.encodeWithSignature("cancelOrder(bytes32)", targetKey)
-        );
+        (bool success,) = orderHandler.call(abi.encodeWithSignature("cancelOrder(bytes32)", targetKey));
         if (success) {
             afterOrderCancellationReentered = true;
         }
     }
 
     function afterOrderFrozen(
-        bytes32 /* key */,
-        EventUtils.EventLogData memory /* order */,
+        bytes32,
+        /* key */
+        EventUtils.EventLogData memory,
+        /* order */
         EventUtils.EventLogData memory /* eventData */
-    ) external {
+    )
+        external {
         // No reentry attempt on frozen
     }
 
     function refundExecutionFee(
-        bytes32 /* key */,
+        bytes32,
+        /* key */
         EventUtils.EventLogData memory /* eventData */
-    ) external payable {
+    )
+        external
+        payable
+    {
         refundExecutionFeeAttempted = true;
         // Attempt to reenter during refund callback
-        (bool success, ) = orderHandler.call(
-            abi.encodeWithSignature("cancelOrder(bytes32)", targetKey)
-        );
+        (bool success,) = orderHandler.call(abi.encodeWithSignature("cancelOrder(bytes32)", targetKey));
         if (success) {
             refundExecutionFeeReentered = true;
         }

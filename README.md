@@ -137,6 +137,8 @@ This repo is **OSS**. You can clone and run it for free.
 
 Customers pay for the **managed service**: operation + customization + SLA + reporting + integrations.
 
+Growth $499/M checkout: [Stripe link](https://buy.stripe.com/fZu9AT3Np2Sp48l4NygnK00)
+
 ### Managed Retainer Tiers (recommended)
 | Tier | Best for | Includes | Price (USD) |
 |---|---|---|---:|

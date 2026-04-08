@@ -111,11 +111,9 @@ jobs:
       matrix:
         include:
           - chain: arbitrum
-            rpc_secret: ARBITRUM_RPC_URL
             log_prefix: arb
             default_fork_block: "420000000"
           - chain: avalanche
-            rpc_secret: AVALANCHE_RPC_URL
             log_prefix: ava
             default_fork_block: "80400000"
     steps:
@@ -154,11 +152,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gmx-
 
-      - name: Prepare RPC secret
-        if: steps.gate.outputs.skip != 'true'
+      - name: Prepare Arbitrum RPC secret
+        if: steps.gate.outputs.skip != 'true' && matrix.chain == 'arbitrum'
         shell: bash
         env:
-          RPC_URL_SECRET: ${{ secrets[matrix.rpc_secret] }}
+          RPC_URL_SECRET: ${{ secrets.ARBITRUM_RPC_URL }}
+        run: |
+          echo "::add-mask::$RPC_URL_SECRET"
+          if [ -z "$RPC_URL_SECRET" ]; then
+            echo "::warning::Missing RPC secret for ${{ matrix.chain }}. Skipping this chain."
+            echo "GMX_SKIP_ROTATION=1" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          RPC_FILE="$RUNNER_TEMP/${{ matrix.chain }}-rpc-url"
+          printf '%s' "$RPC_URL_SECRET" > "$RPC_FILE"
+          chmod 600 "$RPC_FILE"
+          echo "GMX_RPC_FILE=$RPC_FILE" >> "$GITHUB_ENV"
+
+      - name: Prepare Avalanche RPC secret
+        if: steps.gate.outputs.skip != 'true' && matrix.chain == 'avalanche'
+        shell: bash
+        env:
+          RPC_URL_SECRET: ${{ secrets.AVALANCHE_RPC_URL }}
         run: |
           echo "::add-mask::$RPC_URL_SECRET"
           if [ -z "$RPC_URL_SECRET" ]; then

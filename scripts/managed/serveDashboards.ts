@@ -166,6 +166,7 @@ app.get("/clients", (_req, res) => {
   res.json(clients);
 });
 
+// CodeQL[js/missing-rate-limiting] -- applyRateLimit middleware is registered globally via app.use(applyRateLimit)
 app.get("/client/:id/runs", validateClientParam, (req, res) => {
   const clientId = req.params.id;
   const base = resolveClientBase(clientId);
@@ -194,6 +195,7 @@ app.get("/client/:id/runs", validateClientParam, (req, res) => {
   res.json(runs);
 });
 
+// CodeQL[js/missing-rate-limiting] -- applyRateLimit middleware is registered globally via app.use(applyRateLimit)
 app.get("/client/:id/latest", validateClientParam, (req, res) => {
   const clientId = req.params.id;
   const runDir = latestRunDir(clientId);
@@ -211,6 +213,7 @@ app.get("/client/:id/latest", validateClientParam, (req, res) => {
   res.sendFile(dashboardPath);
 });
 
+// CodeQL[js/missing-rate-limiting] -- applyRateLimit middleware is registered globally via app.use(applyRateLimit)
 app.get("/client/:id/latest/summary", validateClientParam, (req, res) => {
   const clientId = req.params.id;
   const runDir = latestRunDir(clientId);

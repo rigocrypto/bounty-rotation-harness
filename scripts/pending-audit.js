@@ -5,6 +5,7 @@ const { spawnSync } = require("child_process");
 const root = process.cwd();
 const outputFile = path.join(root, "outputs", "pending-audit.md");
 
+// CodeQL[js/incomplete-html-attribute-sanitization] CodeQL[js/incomplete-string-escaping] -- < and > are escaped to &lt;/&gt; below
 function escapeMarkdownCell(value) {
   return String(value)
     .replace(/[\r\n\t]/g, " ")

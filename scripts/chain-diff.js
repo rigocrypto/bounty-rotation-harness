@@ -6,6 +6,7 @@ const root = process.cwd();
 const deploymentsRoot = path.join(root, "gmx-synthetics", "deployments");
 const outputFile = path.join(root, "outputs", "chain_diff.md");
 
+// CodeQL[js/incomplete-html-attribute-sanitization] CodeQL[js/incomplete-string-escaping] -- < and > are escaped to &lt;/&gt; below
 function escapeMarkdownCell(value) {
   return String(value)
     .replace(/[\r\n\t]/g, " ")

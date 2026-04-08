@@ -543,7 +543,8 @@ function startServer() {
       try {
         event = stripeClient.webhooks.constructEvent(req.body, signature, webhookSecret);
       } catch (err) {
-        res.status(400).send(`Webhook Error: ${err.message}`);
+        log("warn", "webhook.signature_failure", { error: String(err && err.message) });
+        res.status(400).send("Webhook Error: invalid signature");
         return;
       }
     }

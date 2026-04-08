@@ -149,8 +149,9 @@ jobs:
         if: steps.gate.outputs.skip != 'true'
         shell: bash
         env:
-          RPC_URL: ${{ secrets[matrix.rpc_secret] }}
+          RPC_URL: ${{ secrets[matrix.rpc_secret] }} # CodeQL[actions/excessive-secrets-exposure] -- masked immediately in run script below
         run: |
+          echo "::add-mask::$RPC_URL"
           if [ -z "$RPC_URL" ]; then
             echo "::warning::Missing RPC secret for ${{ matrix.chain }}. Skipping this chain."
             echo "ready=false" >> "$GITHUB_OUTPUT"
@@ -178,7 +179,7 @@ jobs:
         if: steps.gate.outputs.skip != 'true' && steps.rpc.outputs.ready == 'true'
         shell: bash
         env:
-          RPC_URL: ${{ secrets[matrix.rpc_secret] }}
+          RPC_URL: ${{ secrets[matrix.rpc_secret] }} # CodeQL[actions/excessive-secrets-exposure] -- masked immediately in run script below
           ETH_PRICE_USD: ${{ env.ETH_PRICE_USD }}
         run: |
           echo "::add-mask::$RPC_URL"

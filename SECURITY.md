@@ -45,3 +45,24 @@ Out of scope:
 
 - vulnerabilities in upstream GMX contracts unless demonstrated through this repo's PoC workflow
 - third-party infrastructure incidents outside repository code paths
+
+## Transitive Dependency Risk: elliptic
+
+This repository includes a transitive dependency on elliptic via development tooling in the Hardhat ecosystem.
+
+- Usage scope: development and testing only
+- Production runtime: excluded via npm ci --omit=dev
+- No cryptographic signing or key generation in this system relies on elliptic
+
+As of this writing, no patched upstream version of elliptic exists for the reported issue affecting ECDSA nonce handling.
+
+Risk assessment:
+
+- No exposure in production runtime
+- No use in key management or signing flows
+- Dependency is isolated to local testing and CI environments
+
+Status:
+
+Risk is accepted and monitored pending upstream remediation.
+The dependency will be updated or removed when a patched version or alternative becomes available.

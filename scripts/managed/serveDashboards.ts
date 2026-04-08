@@ -3,6 +3,7 @@ import path from "path";
 import { timingSafeEqual } from "crypto";
 
 import express, { type Request, type Response, type NextFunction } from "express";
+import rateLimit from "express-rate-limit";
 
 import { getClientConfig, listClientConfigs } from "../../config/clients";
 
@@ -12,13 +13,6 @@ const MANAGED_OUTPUT_ROOT = path.resolve(process.cwd(), "outputs", "managed");
 const CLIENT_IDS = new Set(listClientConfigs().map((cfg) => cfg.id));
 const RATE_LIMIT_WINDOW_MS = Number(process.env.MANAGED_RATE_LIMIT_WINDOW_MS || 60_000);
 const RATE_LIMIT_MAX_REQUESTS = Number(process.env.MANAGED_RATE_LIMIT_MAX || 60);
-
-type RateLimitBucket = {
-  count: number;
-  resetAt: number;
-};
-
-const rateLimitBuckets = new Map<string, RateLimitBucket>();
 
 function isAllowedClientId(clientId: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(clientId) && CLIENT_IDS.has(clientId);
@@ -37,25 +31,13 @@ function resolveClientBase(clientId: string): string | undefined {
   return base;
 }
 
-function applyRateLimit(req: Request, res: Response, next: NextFunction): void {
-  const now = Date.now();
-  const key = `${req.ip || "unknown"}:${req.path}`;
-  const existing = rateLimitBuckets.get(key);
-
-  if (!existing || now >= existing.resetAt) {
-    rateLimitBuckets.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    next();
-    return;
-  }
-
-  if (existing.count >= RATE_LIMIT_MAX_REQUESTS) {
-    res.status(429).json({ error: "Too many requests" });
-    return;
-  }
-
-  existing.count += 1;
-  next();
-}
+const applyRateLimit = rateLimit({
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: RATE_LIMIT_MAX_REQUESTS,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests" },
+});
 
 function validateClientParam(req: Request, res: Response, next: NextFunction): void {
   const clientId = req.params.id;
@@ -166,7 +148,6 @@ app.get("/clients", (_req, res) => {
   res.json(clients);
 });
 
-// CodeQL[js/missing-rate-limiting] -- applyRateLimit middleware is registered globally via app.use(applyRateLimit)
 app.get("/client/:id/runs", validateClientParam, (req, res) => {
   const clientId = req.params.id;
   const base = resolveClientBase(clientId);
@@ -195,7 +176,6 @@ app.get("/client/:id/runs", validateClientParam, (req, res) => {
   res.json(runs);
 });
 
-// CodeQL[js/missing-rate-limiting] -- applyRateLimit middleware is registered globally via app.use(applyRateLimit)
 app.get("/client/:id/latest", validateClientParam, (req, res) => {
   const clientId = req.params.id;
   const runDir = latestRunDir(clientId);
@@ -213,7 +193,6 @@ app.get("/client/:id/latest", validateClientParam, (req, res) => {
   res.sendFile(dashboardPath);
 });
 
-// CodeQL[js/missing-rate-limiting] -- applyRateLimit middleware is registered globally via app.use(applyRateLimit)
 app.get("/client/:id/latest/summary", validateClientParam, (req, res) => {
   const clientId = req.params.id;
   const runDir = latestRunDir(clientId);

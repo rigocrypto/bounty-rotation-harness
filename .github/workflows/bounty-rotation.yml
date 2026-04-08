@@ -148,9 +148,8 @@ jobs:
         id: rpc
         if: steps.gate.outputs.skip != 'true'
         shell: bash
-        env:
-          RPC_URL: ${{ secrets[matrix.rpc_secret] }} # CodeQL[actions/excessive-secrets-exposure] -- masked immediately in run script below
         run: |
+          RPC_URL="${{ secrets[matrix.rpc_secret] }}"
           echo "::add-mask::$RPC_URL"
           if [ -z "$RPC_URL" ]; then
             echo "::warning::Missing RPC secret for ${{ matrix.chain }}. Skipping this chain."
@@ -179,9 +178,9 @@ jobs:
         if: steps.gate.outputs.skip != 'true' && steps.rpc.outputs.ready == 'true'
         shell: bash
         env:
-          RPC_URL: ${{ secrets[matrix.rpc_secret] }} # CodeQL[actions/excessive-secrets-exposure] -- masked immediately in run script below
           ETH_PRICE_USD: ${{ env.ETH_PRICE_USD }}
         run: |
+          RPC_URL="${{ secrets[matrix.rpc_secret] }}"
           echo "::add-mask::$RPC_URL"
           mkdir -p exploit-proofs/rotation-logs
 

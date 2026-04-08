@@ -1,19 +1,15 @@
 const fs = require("fs");
 const path = require("path");
 const { JsonRpcProvider, keccak256 } = require("ethers");
+const escapeHtml = require("escape-html");
 
 const root = process.cwd();
 const deploymentsRoot = path.join(root, "gmx-synthetics", "deployments");
 const outputFile = path.join(root, "outputs", "chain_diff.md");
 
-// CodeQL[js/incomplete-html-attribute-sanitization] CodeQL[js/incomplete-string-escaping] -- < and > are escaped to &lt;/&gt; below
 function escapeMarkdownCell(value) {
-  return String(value)
-    .replace(/[\r\n\t]/g, " ")
-    .replace(/\|/g, "\\|")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .slice(0, 240);
+  const normalized = String(value).replace(/[\r\n\t]/g, " ").slice(0, 240);
+  return escapeHtml(normalized).replace(/\|/g, "\\|");
 }
 
 function stripMetadata(bytecode) {

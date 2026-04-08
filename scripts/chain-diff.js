@@ -6,9 +6,17 @@ const root = process.cwd();
 const deploymentsRoot = path.join(root, "gmx-synthetics", "deployments");
 const outputFile = path.join(root, "outputs", "chain_diff.md");
 
+function constrainCellInput(value) {
+  return value
+    .replace(/[^a-zA-Z0-9 _.:/()\-+#[\],]/g, "_")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function escapeMarkdownCell(value) {
   const normalized = String(value).replace(/[\r\n\t]/g, " ").slice(0, 240);
-  return encodeURIComponent(normalized);
+  const constrained = constrainCellInput(normalized);
+  return encodeURIComponent(constrained);
 }
 
 function stripMetadata(bytecode) {

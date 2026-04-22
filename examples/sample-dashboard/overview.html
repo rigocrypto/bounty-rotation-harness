@@ -214,13 +214,16 @@
       padding: 4px 8px;
     }
     .mono { font-family: Consolas, monospace; }
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 20px;
-      white-space: normal;
+    .sample-notice {
+      background: rgba(245,158,11,0.12);
+      border: 1px solid rgba(245,158,11,0.4);
+      border-radius: 10px;
+      color: #fde68a;
+      font-size: 13px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
     }
-    .footer {
+    .empty {
       border: 1px solid var(--border);
       border-radius: 12px;
       background: #0f1a32;
@@ -245,22 +248,23 @@
 </head>
 <body>
   <main class="shell">
+    <div class="sample-notice">Sample data &#8212; generated from example findings, not a live protocol scan.</div>
     <section class="header">
       <div>
         <h1 class="title">GMX Audit Control Center</h1>
         <div class="subtitle">Overview dashboard generated from deterministic pipeline artifacts</div>
       </div>
       <div class="chips">
-        <span class="chip">Chain: unknown</span>
-        <span class="chip">Generated: 2026-03-16T01:29:12.712Z</span>
+        <span class="chip">Chain: 3 chains</span>
+        <span class="chip">Generated: 2026-04-21T00:00:00.000Z</span>
       </div>
     </section>
 
     <section class="cards">
       <article class="card">
         <h2>Security Score</h2>
-        <div class="value" style="color:#22c55e">100/100</div>
-        <div class="hint">Healthy</div>
+        <div class="value" style="color:#ef4444">55/100</div>
+        <div class="hint">Critical</div>
       </article>
       <article class="card">
         <h2>Total Runs</h2>
@@ -274,8 +278,8 @@
       </article>
       <article class="card">
         <h2>Critical / High</h2>
-        <div class="value">0</div>
-        <div class="hint">Critical 0 + High 0</div>
+        <div class="value">2</div>
+        <div class="hint">Critical 1 + High 1</div>
       </article>
     </section>
 
@@ -325,20 +329,20 @@
           
       <div class="severity-row">
         <div class="severity-name">Critical</div>
-        <div class="severity-bar-wrap"><div class="severity-bar" style="width:0.00%;background:#dc2626"></div></div>
-        <div class="severity-count">0</div>
+        <div class="severity-bar-wrap"><div class="severity-bar" style="width:33.33%;background:#dc2626"></div></div>
+        <div class="severity-count">1</div>
       </div>
 
       <div class="severity-row">
         <div class="severity-name">High</div>
-        <div class="severity-bar-wrap"><div class="severity-bar" style="width:0.00%;background:#f97316"></div></div>
-        <div class="severity-count">0</div>
+        <div class="severity-bar-wrap"><div class="severity-bar" style="width:33.33%;background:#f97316"></div></div>
+        <div class="severity-count">1</div>
       </div>
 
       <div class="severity-row">
         <div class="severity-name">Medium</div>
-        <div class="severity-bar-wrap"><div class="severity-bar" style="width:0.00%;background:#f59e0b"></div></div>
-        <div class="severity-count">0</div>
+        <div class="severity-bar-wrap"><div class="severity-bar" style="width:33.33%;background:#f59e0b"></div></div>
+        <div class="severity-count">1</div>
       </div>
 
       <div class="severity-row">
@@ -368,7 +372,33 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td colspan="6" class="empty">No findings in current triage artifact.</td></tr>
+          
+      <tr>
+        <td><span class="severity sev-critical">CRITICAL</span></td>
+        <td>Capital Conservation Violation in Settlement</td>
+        <td>ethereum</td>
+        <td class="mono">18,765,432</td>
+        <td class="mono">$2,410,000.00</td>
+        <td><span class="status">new</span></td>
+      </tr>
+
+      <tr>
+        <td><span class="severity sev-high">HIGH</span></td>
+        <td>Missing Oracle Freshness Validation</td>
+        <td>base</td>
+        <td class="mono">19,842,271</td>
+        <td class="mono">$3,090,000.00</td>
+        <td><span class="status">new</span></td>
+      </tr>
+
+      <tr>
+        <td><span class="severity sev-medium">MEDIUM</span></td>
+        <td>Liquidation Close Factor Bypass</td>
+        <td>base</td>
+        <td class="mono">19,812,009</td>
+        <td class="mono">$4,560.00</td>
+        <td><span class="status">triaged</span></td>
+      </tr>
         </tbody>
       </table>
       <div style="padding:10px 12px;border-top:1px solid #243658;text-align:right;background:#0f1a32">
@@ -377,7 +407,7 @@
     </section>
 
     <section class="footer">
-      <span>Generated: 2026-03-16T01:29:12.712Z</span>
+      <span>Generated: 2026-04-21T00:00:00.000Z</span>
       <span>Schema v1.0.0</span>
     </section>
   </main>

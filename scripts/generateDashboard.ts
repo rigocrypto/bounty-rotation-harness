@@ -1749,7 +1749,8 @@ function main(): void {
   const proofPattern = getArg("--proof-summaries", "proof-packages/**/summary.json");
   const isSample = process.argv.includes("--sample");
 
-  const logs = collectLogs();
+  // In sample mode skip log ingestion — the DB is pre-seeded by seedSampleDb.mjs
+  const logs = isSample ? [] : collectLogs();
   const parsedRuns = logs.flatMap(parseRunsFromLog);
 
   const db = ensureDB(path.resolve(process.cwd(), dbPath));

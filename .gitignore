@@ -6,6 +6,7 @@ outputs/
 proof-packages/
 exploit-proofs/*.json
 *.db
+!examples/sample-data/sample-results.db
 dashboard.html
 
 !outputs/metrics/.gitkeep

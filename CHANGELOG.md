@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 - Starter JSON schemas (v1) for triage, finding, run, proof, score, manifest
 - Schema validation script and CI integration
 - Sample dashboard in examples/sample-dashboard/
+- Findings explorer page with severity badges, proof links, and summary counts bar
+- Navigation link from overview findings table to explorer page
 
 ### Changed
 - Upgraded dashboard generator overview template to Control Center layout

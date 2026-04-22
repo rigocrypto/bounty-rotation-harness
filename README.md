@@ -120,6 +120,15 @@ The package is designed for deterministic replay and submission workflows.
 - Filters for chain, block window, and finding state
 - Artifact-linked detail pages for triage and proof review
 
+## Dashboard Preview
+
+![Control Center Overview](examples/sample-dashboard/screenshot.png)
+
+[View sample dashboard ->](examples/sample-dashboard/overview.html)
+
+> Sample generated from a representative run. Actual outputs reflect
+> your protocol targets and run configuration.
+
 ---
 
 ## Managed Service

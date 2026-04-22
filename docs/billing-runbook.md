@@ -11,6 +11,24 @@ This runbook covers billing operations for managed clients, including webhook pr
 - `npm run billing:status -- --client <clientId>`
 - `npm run billing:webhook-server`
 
+## Billing Portal Endpoint
+
+The billing server can create a Stripe-hosted customer portal session.
+
+Route:
+
+- `POST /api/billing/portal`
+
+Request requirements:
+
+- `Authorization: Bearer <BILLING_PORTAL_API_TOKEN>`
+- JSON body with `clientId`
+
+Required env:
+
+- `BILLING_PORTAL_RETURN_URL`
+- `BILLING_PORTAL_API_TOKEN`
+
 ## Daily Checks
 
 1. Verify webhook process health endpoint returns `ok`.

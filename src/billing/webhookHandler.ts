@@ -2,9 +2,17 @@ import express, { Request, Response } from "express";
 import Stripe from "stripe";
 
 import { openBillingDb } from "./db";
+import { createBillingPortalSession } from "./portal";
+import { getBillingAccount } from "./billingService";
 import { BillingPlan, BillingStatus } from "./types";
 
 type StripeEvent = Stripe.Event;
+type PortalSessionFactory = (stripeCustomerId: string, returnUrl: string, stripeClient: Stripe) => Promise<string>;
+
+type BillingAppOptions = {
+  stripeClient?: Stripe;
+  createPortalSession?: PortalSessionFactory;
+};
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -55,6 +63,21 @@ function summarizePayload(event: StripeEvent): string {
     created: event.created
   };
   return JSON.stringify(payload);
+}
+
+function isStripeClient(input?: Stripe | BillingAppOptions): input is Stripe {
+  return Boolean(input && typeof input === "object" && "webhooks" in input);
+}
+
+function getBillingPortalApiToken(): string | undefined {
+  const token = process.env.BILLING_PORTAL_API_TOKEN;
+  return typeof token === "string" && token.length > 0 ? token : undefined;
+}
+
+function extractBearerToken(header: string | undefined): string | undefined {
+  if (!header) return undefined;
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  return match?.[1];
 }
 
 export function isEventProcessed(stripeEventId: string): boolean {
@@ -372,19 +395,74 @@ function routeEvent(event: StripeEvent): number | undefined {
   }
 }
 
-export function createBillingWebhookApp(stripeClient?: Stripe): express.Express {
+export function createBillingWebhookApp(input?: Stripe | BillingAppOptions): express.Express {
+  const options = isStripeClient(input) ? { stripeClient: input } : input ?? {};
   const secret = process.env.STRIPE_SECRET_KEY;
-  if (!secret && !stripeClient) {
+  if (!secret && !options.stripeClient) {
     throw new Error("Missing STRIPE_SECRET_KEY");
   }
 
-  const client = stripeClient ?? new Stripe(secret as string);
+  const client = options.stripeClient ?? new Stripe(secret as string);
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const createPortalSession = options.createPortalSession ?? createBillingPortalSession;
 
   const app = express();
 
   app.get("/health", (_req, res) => {
     res.json({ ok: true });
+  });
+
+  app.post("/api/billing/portal", express.json(), async (req: Request, res: Response) => {
+    const expectedToken = getBillingPortalApiToken();
+    if (!expectedToken) {
+      res.status(503).json({ ok: false, error: "billing_portal_unavailable" });
+      return;
+    }
+
+    const bearerToken = extractBearerToken(req.headers.authorization);
+    if (!bearerToken) {
+      res.status(401).json({ ok: false, error: "missing_authorization" });
+      return;
+    }
+
+    if (bearerToken !== expectedToken) {
+      res.status(403).json({ ok: false, error: "forbidden" });
+      return;
+    }
+
+    const clientId = typeof req.body?.clientId === "string" ? req.body.clientId.trim() : "";
+    if (!clientId) {
+      res.status(400).json({ ok: false, error: "missing_client_id" });
+      return;
+    }
+
+    const returnUrl = process.env.BILLING_PORTAL_RETURN_URL;
+    if (!returnUrl) {
+      res.status(503).json({ ok: false, error: "billing_portal_unavailable" });
+      return;
+    }
+
+    const account = getBillingAccount(clientId);
+    if (!account) {
+      res.status(404).json({ ok: false, error: "billing_account_not_found" });
+      return;
+    }
+
+    if (!account.stripeCustomerId) {
+      res.status(400).json({ ok: false, error: "stripe_customer_missing" });
+      return;
+    }
+
+    try {
+      const url = await createPortalSession(account.stripeCustomerId, returnUrl, client);
+      res.status(200).json({ ok: true, url });
+    } catch (error) {
+      console.error("[billing:portal] failed to create portal session", {
+        clientId,
+        error: (error as Error).message
+      });
+      res.status(502).json({ ok: false, error: "billing_portal_unavailable" });
+    }
   });
 
   app.post("/api/webhooks/stripe", express.raw({ type: "application/json" }), (req: Request, res: Response) => {

@@ -135,6 +135,31 @@ Dashboard behavior:
 - Latest dashboard route returns a billing-required notice when account is not active.
 - Historical metadata routes can remain available during read-only grace windows.
 
+## Billing Portal
+
+Managed billing can expose a minimal Stripe-hosted customer portal endpoint.
+
+Endpoint:
+
+- `POST /api/billing/portal`
+
+Request:
+
+- JSON body: `{ "clientId": "example" }`
+- Header: `Authorization: Bearer <BILLING_PORTAL_API_TOKEN>`
+
+Behavior:
+
+- Looks up the billing account by `clientId`
+- Requires a persisted Stripe customer ID
+- Creates a Stripe Billing Portal session
+- Returns JSON with the hosted portal URL
+
+Required env:
+
+- `BILLING_PORTAL_RETURN_URL`
+- `BILLING_PORTAL_API_TOKEN`
+
 For architecture and operational procedures, see:
 
 - `docs/stripe-integration.md`

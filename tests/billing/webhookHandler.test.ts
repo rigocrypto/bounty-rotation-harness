@@ -41,6 +41,38 @@ function post(port, payload, signature) {
   });
 }
 
+function postJson(port, pathName, payload, token) {
+  const body = JSON.stringify(payload);
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        hostname: "127.0.0.1",
+        port,
+        path: pathName,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(body),
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+      },
+      (res) => {
+        let chunks = "";
+        res.on("data", (chunk) => {
+          chunks += chunk.toString();
+        });
+        res.on("end", () => {
+          resolve({ status: res.statusCode || 0, body: chunks });
+        });
+      }
+    );
+
+    req.on("error", reject);
+    req.write(body);
+    req.end();
+  });
+}
+
 describe("webhookHandler", () => {
   let root;
   let server;
@@ -52,12 +84,19 @@ describe("webhookHandler", () => {
     process.env.STRIPE_SECRET_KEY = "sk_test_123";
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_123";
     process.env.STRIPE_GROWTH_PRICE_ID = "price_growth";
+    process.env.BILLING_PORTAL_API_TOKEN = "portal-token";
+    process.env.BILLING_PORTAL_RETURN_URL = "https://managed.example.com/billing";
 
     runBillingMigrations();
 
     stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-    const app = createBillingWebhookApp(stripe);
+    const app = createBillingWebhookApp({
+      stripeClient: stripe,
+      createPortalSession: async (stripeCustomerId, returnUrl) => {
+        return `${returnUrl}?customer=${stripeCustomerId}`;
+      }
+    });
     server = app.listen(0);
     await new Promise((resolve) => server.once("listening", () => resolve()));
   });
@@ -68,7 +107,39 @@ describe("webhookHandler", () => {
     delete process.env.STRIPE_SECRET_KEY;
     delete process.env.STRIPE_WEBHOOK_SECRET;
     delete process.env.STRIPE_GROWTH_PRICE_ID;
+    delete process.env.BILLING_PORTAL_API_TOKEN;
+    delete process.env.BILLING_PORTAL_RETURN_URL;
     fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it("creates a billing portal session for an authorized client", async () => {
+    const db = openBillingDb();
+    const ts = new Date().toISOString();
+    db.prepare(
+      `INSERT INTO billing_accounts (
+        client_id, stripe_customer_id, plan, billing_status,
+        current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run("portal-client", "cus_portal", "growth", "active", ts, ts, 0, ts, ts);
+    db.close();
+
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("Missing test port");
+
+    const res = await postJson(address.port, "/api/billing/portal", { clientId: "portal-client" }, "portal-token");
+    const body = JSON.parse(res.body);
+
+    assert.equal(res.status, 200);
+    assert.equal(body.ok, true);
+    assert.equal(body.url, "https://managed.example.com/billing?customer=cus_portal");
+  });
+
+  it("rejects unauthorized portal requests", async () => {
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("Missing test port");
+
+    const res = await postJson(address.port, "/api/billing/portal", { clientId: "portal-client" });
+    assert.equal(res.status, 401);
   });
 
   it("rejects invalid signature", async () => {

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "severity": "High",
+  "detector": "OracleFreshnessCheck",
+  "chain": "base",
+  "block": 19842271,
+  "userNet": "965625000000000000000",
+  "poolNet": "-965625000000000000000",
+  "timestamp": "2026-04-21T00:00:00.000Z"
+}

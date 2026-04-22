@@ -15,6 +15,9 @@ All notable changes to this project will be documented in this file.
 - Sample dashboard in examples/sample-dashboard/
 - Findings explorer page with severity badges, proof links, and summary counts bar
 - Navigation link from overview findings table to explorer page
+- Sample seed data under `examples/sample-data/` with 3 representative fictional findings
+- Sample disclaimer banner in generated pages when run with `--sample` flag
+- `dashboard:sample` npm script for one-command sample regeneration
 
 ### Changed
 - Upgraded dashboard generator overview template to Control Center layout

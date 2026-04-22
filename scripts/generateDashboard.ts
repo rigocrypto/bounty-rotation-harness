@@ -33,6 +33,8 @@ type TriageProof = {
   title?: string;
   status?: string;
   proof_hash?: string;
+  finding_id?: string;
+  protocol?: string;
 };
 
 type TriageResult = {
@@ -63,6 +65,8 @@ type FindingRow = {
   impact: string;
   impactNumeric: number;
   status: string;
+  findingId: string;
+  protocol: string;
 };
 
 const SCORE_WEIGHTS: Record<FindingRow["severity"], number> = {
@@ -442,6 +446,9 @@ function triageToFindings(triage: TriageResult | null): FindingRow[] {
     const impactNumeric = toImpactNumber(proof.usd_impact);
     const status = (proof.status || "new").toLowerCase();
 
+    const findingId = proof.finding_id || proof.proof_hash || `${(proof.detector || "det").toLowerCase()}-${proof.chain || "unknown"}-${proof.block ?? 0}`;
+    const protocol = proof.protocol || (proof.detector || "");
+
     return {
       severity,
       chain,
@@ -449,7 +456,9 @@ function triageToFindings(triage: TriageResult | null): FindingRow[] {
       impact,
       impactNumeric,
       status,
-      block: Number(proof.block || 0)
+      block: Number(proof.block || 0),
+      findingId,
+      protocol
     } as FindingRow;
   });
 
@@ -602,10 +611,14 @@ function generateFindingsHtml(input: {
   triage: TriageResult | null;
   generatedAt: string;
   chainLabel: string;
+  isSample?: boolean;
 }): string {
   const counts = buildSeverityCounts(input.findings);
   const findingsRows = buildFindingsExplorerRows(input.findings, input.triage);
   const total = input.findings.length;
+  const sampleNotice = input.isSample
+    ? `<div class="sample-notice">Sample data &#8212; generated from example findings, not a live protocol scan.</div>`
+    : "";
 
   return `<!doctype html>
 <html lang="en">
@@ -787,6 +800,15 @@ function generateFindingsHtml(input: {
     .proof-link:hover { background: #1e3a6e; }
     .no-proof { color: var(--muted); }
     .mono { font-family: Consolas, monospace; }
+    .sample-notice {
+      background: rgba(245,158,11,0.12);
+      border: 1px solid rgba(245,158,11,0.4);
+      border-radius: 10px;
+      color: #fde68a;
+      font-size: 13px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+    }
     .empty {
       text-align: center;
       color: var(--muted);
@@ -817,6 +839,7 @@ function generateFindingsHtml(input: {
 <body>
   <main class="shell">
     <nav class="breadcrumb"><a href="overview.html">&#8592; Overview</a> › Findings</nav>
+    ${sampleNotice}
     <section class="header">
       <div>
         <h1 class="title">GMX Audit Control Center</h1>
@@ -921,6 +944,7 @@ function generateHtml(input: {
   proofCount: number;
   generatedAt: string;
   chainLabel: string;
+  isSample?: boolean;
 }): string {
   const score = computeOverviewScore(input.findings);
   const scoreColor = scoreBadgeColor(score);
@@ -930,6 +954,9 @@ function generateHtml(input: {
   const trendSvg = buildTrendSvg(input.runs);
   const severityBars = buildSeverityBars(severityCounts);
   const findingsRows = buildFindingsRows(input.findings);
+  const sampleNotice = input.isSample
+    ? `<div class="sample-notice">Sample data &#8212; generated from example findings, not a live protocol scan.</div>`
+    : "";
 
   return `<!doctype html>
 <html lang="en">
@@ -1147,13 +1174,16 @@ function generateHtml(input: {
       padding: 4px 8px;
     }
     .mono { font-family: Consolas, monospace; }
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 20px;
-      white-space: normal;
+    .sample-notice {
+      background: rgba(245,158,11,0.12);
+      border: 1px solid rgba(245,158,11,0.4);
+      border-radius: 10px;
+      color: #fde68a;
+      font-size: 13px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
     }
-    .footer {
+    .empty {
       border: 1px solid var(--border);
       border-radius: 12px;
       background: #0f1a32;
@@ -1178,6 +1208,7 @@ function generateHtml(input: {
 </head>
 <body>
   <main class="shell">
+    ${sampleNotice}
     <section class="header">
       <div>
         <h1 class="title">GMX Audit Control Center</h1>
@@ -1267,6 +1298,7 @@ function main(): void {
   const outPath = getArg("--out", "dashboard.html");
   const triagePath = getArg("--triage", "outputs/triage/triage-result.json");
   const proofPattern = getArg("--proof-summaries", "proof-packages/**/summary.json");
+  const isSample = process.argv.includes("--sample");
 
   const logs = collectLogs();
   const parsedRuns = logs.flatMap(parseRunsFromLog);
@@ -1288,7 +1320,8 @@ function main(): void {
     findings,
     proofCount: proofs.length,
     generatedAt,
-    chainLabel
+    chainLabel,
+    isSample
   });
 
   const outFile = path.resolve(process.cwd(), outPath);
@@ -1299,7 +1332,8 @@ function main(): void {
     findings,
     triage,
     generatedAt,
-    chainLabel
+    chainLabel,
+    isSample
   });
 
   const findingsFile = path.join(path.dirname(outFile), "findings.html");

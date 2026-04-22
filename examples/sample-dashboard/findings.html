@@ -178,6 +178,15 @@
     .proof-link:hover { background: #1e3a6e; }
     .no-proof { color: var(--muted); }
     .mono { font-family: Consolas, monospace; }
+    .sample-notice {
+      background: rgba(245,158,11,0.12);
+      border: 1px solid rgba(245,158,11,0.4);
+      border-radius: 10px;
+      color: #fde68a;
+      font-size: 13px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+    }
     .empty {
       text-align: center;
       color: var(--muted);
@@ -208,22 +217,23 @@
 <body>
   <main class="shell">
     <nav class="breadcrumb"><a href="overview.html">&#8592; Overview</a> › Findings</nav>
+    <div class="sample-notice">Sample data &#8212; generated from example findings, not a live protocol scan.</div>
     <section class="header">
       <div>
         <h1 class="title">GMX Audit Control Center</h1>
         <div class="subtitle">Findings explorer — all findings from current triage artifact</div>
       </div>
       <div class="chips">
-        <span class="chip">Chain: unknown</span>
-        <span class="chip">Generated: 2026-03-16T01:29:12.712Z</span>
+        <span class="chip">Chain: 3 chains</span>
+        <span class="chip">Generated: 2026-04-21T00:00:00.000Z</span>
       </div>
     </section>
 
     <div class="summary-bar">
-      <div class="summary-count"><div class="count-value count-total">0</div><div class="count-label">Total</div></div>
-      <div class="summary-count"><div class="count-value count-critical">0</div><div class="count-label">Critical</div></div>
-      <div class="summary-count"><div class="count-value count-high">0</div><div class="count-label">High</div></div>
-      <div class="summary-count"><div class="count-value count-medium">0</div><div class="count-label">Medium</div></div>
+      <div class="summary-count"><div class="count-value count-total">3</div><div class="count-label">Total</div></div>
+      <div class="summary-count"><div class="count-value count-critical">1</div><div class="count-label">Critical</div></div>
+      <div class="summary-count"><div class="count-value count-high">1</div><div class="count-label">High</div></div>
+      <div class="summary-count"><div class="count-value count-medium">1</div><div class="count-label">Medium</div></div>
       <div class="summary-count"><div class="count-value count-low">0</div><div class="count-label">Low</div></div>
     </div>
 
@@ -242,13 +252,42 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td colspan="7" class="empty">No findings in current triage artifact.</td></tr>
+          
+      <tr>
+        <td><span class="severity sev-critical">CRITICAL</span></td>
+        <td><!-- TODO: Commit 6 — link to finding detail page -->Capital Conservation Violation in Settlement</td>
+        <td>ethereum</td>
+        <td class="mono">18,765,432</td>
+        <td class="mono">$2,410,000.00</td>
+        <td><span class="no-proof">—</span></td>
+        <td><span class="status">new</span></td>
+      </tr>
+
+      <tr>
+        <td><span class="severity sev-high">HIGH</span></td>
+        <td><!-- TODO: Commit 6 — link to finding detail page -->Missing Oracle Freshness Validation</td>
+        <td>base</td>
+        <td class="mono">19,842,271</td>
+        <td class="mono">$3,090,000.00</td>
+        <td><span class="no-proof">—</span></td>
+        <td><span class="status">new</span></td>
+      </tr>
+
+      <tr>
+        <td><span class="severity sev-medium">MEDIUM</span></td>
+        <td><!-- TODO: Commit 6 — link to finding detail page -->Liquidation Close Factor Bypass</td>
+        <td>base</td>
+        <td class="mono">19,812,009</td>
+        <td class="mono">$4,560.00</td>
+        <td><span class="no-proof">—</span></td>
+        <td><span class="status">triaged</span></td>
+      </tr>
         </tbody>
       </table>
     </section>
 
     <section class="footer">
-      <span>Generated: 2026-03-16T01:29:12.712Z</span>
+      <span>Generated: 2026-04-21T00:00:00.000Z</span>
       <span>Schema v1.0.0</span>
     </section>
   </main>

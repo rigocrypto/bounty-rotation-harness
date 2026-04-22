@@ -6,6 +6,7 @@ import express, { type Request, type Response, type NextFunction } from "express
 import rateLimit from "express-rate-limit";
 
 import { getClientConfig, listClientConfigs } from "../../config/clients";
+import { getManagedAccessDecision } from "../../src/billing/billingService";
 
 const app = express();
 const PORT = Number(process.env.MANAGED_PORT || 8787);
@@ -134,6 +135,55 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
   next();
 }
 
+function requireBillingForRuns(req: Request, res: Response, next: NextFunction): void {
+  const clientId = req.params.id;
+  if (!clientId) {
+    res.status(400).json({ error: "Missing client id" });
+    return;
+  }
+
+  const decision = getManagedAccessDecision(clientId);
+  if (!decision.allowed && !decision.readOnly) {
+    res.status(402).json({
+      error: "Billing required",
+      reason: decision.reason,
+      status: decision.status
+    });
+    return;
+  }
+
+  next();
+}
+
+function renderBillingRequiredNotice(clientId: string, reason: string): string {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Billing Required</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+      .wrap { max-width: 760px; margin: 48px auto; padding: 24px; }
+      .card { background: #111827; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+      h1 { margin-top: 0; font-size: 1.4rem; }
+      code { background: #1f2937; padding: 2px 6px; border-radius: 6px; }
+      p { line-height: 1.55; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>Billing Required</h1>
+        <p>Managed dashboard access is unavailable for client <code>${clientId}</code>.</p>
+        <p>Reason: <code>${reason}</code></p>
+        <p>Historical run metadata may remain available during grace windows, but new managed execution is disabled until billing is active.</p>
+      </div>
+    </div>
+  </body>
+</html>`;
+}
+
 app.use(authMiddleware);
 app.use(applyRateLimit);
 
@@ -148,7 +198,7 @@ app.get("/clients", (_req, res) => {
   res.json(clients);
 });
 
-app.get("/client/:id/runs", validateClientParam, (req, res) => {
+app.get("/client/:id/runs", validateClientParam, requireBillingForRuns, (req, res) => {
   const clientId = req.params.id;
   const base = resolveClientBase(clientId);
   if (!base) {
@@ -178,6 +228,14 @@ app.get("/client/:id/runs", validateClientParam, (req, res) => {
 
 app.get("/client/:id/latest", validateClientParam, (req, res) => {
   const clientId = req.params.id;
+  const decision = getManagedAccessDecision(clientId);
+  if (!decision.allowed) {
+    res.status(402).setHeader("content-type", "text/html; charset=utf-8").send(
+      renderBillingRequiredNotice(clientId, decision.reason)
+    );
+    return;
+  }
+
   const runDir = latestRunDir(clientId);
   if (!runDir) {
     res.status(404).json({ error: "No runs found" });
@@ -193,7 +251,7 @@ app.get("/client/:id/latest", validateClientParam, (req, res) => {
   res.sendFile(dashboardPath);
 });
 
-app.get("/client/:id/latest/summary", validateClientParam, (req, res) => {
+app.get("/client/:id/latest/summary", validateClientParam, requireBillingForRuns, (req, res) => {
   const clientId = req.params.id;
   const runDir = latestRunDir(clientId);
   if (!runDir) {

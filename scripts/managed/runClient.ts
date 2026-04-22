@@ -4,6 +4,7 @@ import { spawn } from "child_process";
 import { randomUUID } from "crypto";
 
 import { getClientConfig } from "../../config/clients";
+import { getManagedAccessDecision } from "../../src/billing/billingService";
 
 type CliArgs = {
   clientId: string;
@@ -417,6 +418,56 @@ function pruneOldRuns(clientDir: string, keepDays: number): void {
 export async function executeClientRun(args: CliArgs): Promise<RunSummary> {
   const client = getClientConfig(args.clientId);
   const chains = args.chainsOverride && args.chainsOverride.length > 0 ? args.chainsOverride : client.chains;
+
+  const billingDecision = getManagedAccessDecision(client.id);
+  if (!billingDecision.allowed) {
+    const timestamp = new Date().toISOString();
+    const runId = toRunId();
+    const runDir = path.join(process.cwd(), "outputs", "managed", client.id, toIsoDate(), runId);
+    ensureDir(runDir);
+
+    const blockedSummary: RunSummary = {
+      clientId: client.id,
+      timestamp,
+      runId,
+      status: "failed",
+      rotationErrors: [
+        {
+          chain: "billing",
+          error: `managed execution blocked: ${billingDecision.reason}`
+        }
+      ],
+      tier: client.tiers,
+      chains,
+      chainRuns: [],
+      triage: {
+        totalProofs: 0,
+        hasCritical: false,
+        hasHigh: false,
+        criticalCount: 0,
+        highCount: 0,
+        mediumCount: 0
+      },
+      artifacts: {
+        runDir: path.relative(process.cwd(), runDir).replace(/\\/g, "/"),
+        triageResultPath: path.relative(process.cwd(), path.join(runDir, "triage-result.json")).replace(/\\/g, "/"),
+        dashboardPath: path.relative(process.cwd(), path.join(runDir, "dashboard.html")).replace(/\\/g, "/"),
+        dbPath: path.relative(process.cwd(), path.join(runDir, "results.db")).replace(/\\/g, "/")
+      }
+    };
+
+    fs.writeFileSync(
+      path.join(runDir, "run-summary.json"),
+      `${JSON.stringify(blockedSummary, null, 2)}\n`,
+      "utf8"
+    );
+
+    console.warn(
+      `[managed:run] Skipping ${client.id}: billing gate denied execution (${billingDecision.reason}).`
+    );
+
+    return blockedSummary;
+  }
 
   const { warnings: envWarnings, errors: envErrors } = validateClientEnv(client, chains);
   for (const w of envWarnings) console.warn(`[validate] ${w}`);

@@ -86,6 +86,7 @@ describe("webhookHandler", () => {
     process.env.STRIPE_GROWTH_PRICE_ID = "price_growth";
     process.env.BILLING_PORTAL_API_TOKEN = "portal-token";
     process.env.BILLING_PORTAL_RETURN_URL = "https://managed.example.com/billing";
+    process.env.BILLING_PORTAL_RATE_LIMIT_MAX = "10";
 
     runBillingMigrations();
 
@@ -109,6 +110,7 @@ describe("webhookHandler", () => {
     delete process.env.STRIPE_GROWTH_PRICE_ID;
     delete process.env.BILLING_PORTAL_API_TOKEN;
     delete process.env.BILLING_PORTAL_RETURN_URL;
+    delete process.env.BILLING_PORTAL_RATE_LIMIT_MAX;
     fs.rmSync(root, { recursive: true, force: true });
   });
 
@@ -140,6 +142,50 @@ describe("webhookHandler", () => {
 
     const res = await postJson(address.port, "/api/billing/portal", { clientId: "portal-client" });
     assert.equal(res.status, 401);
+  });
+
+  it("rate limits repeated portal requests", async () => {
+    process.env.BILLING_PORTAL_RATE_LIMIT_MAX = "1";
+
+    await new Promise((resolve) => server.close(() => resolve()));
+
+    const app = createBillingWebhookApp({
+      stripeClient: stripe,
+      createPortalSession: async (stripeCustomerId, returnUrl) => {
+        return `${returnUrl}?customer=${stripeCustomerId}`;
+      }
+    });
+    server = app.listen(0);
+    await new Promise((resolve) => server.once("listening", () => resolve()));
+
+    const db = openBillingDb();
+    const ts = new Date().toISOString();
+    db.prepare(
+      `INSERT INTO billing_accounts (
+        client_id, stripe_customer_id, plan, billing_status,
+        current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run("portal-rate-limit-client", "cus_rate_limit", "growth", "active", ts, ts, 0, ts, ts);
+    db.close();
+
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("Missing test port");
+
+    const first = await postJson(
+      address.port,
+      "/api/billing/portal",
+      { clientId: "portal-rate-limit-client" },
+      "portal-token"
+    );
+    const second = await postJson(
+      address.port,
+      "/api/billing/portal",
+      { clientId: "portal-rate-limit-client" },
+      "portal-token"
+    );
+
+    assert.equal(first.status, 200);
+    assert.equal(second.status, 429);
   });
 
   it("rejects invalid signature", async () => {

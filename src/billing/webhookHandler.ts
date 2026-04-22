@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import rateLimit from "express-rate-limit";
 import Stripe from "stripe";
 
 import { openBillingDb } from "./db";
@@ -13,6 +14,9 @@ type BillingAppOptions = {
   stripeClient?: Stripe;
   createPortalSession?: PortalSessionFactory;
 };
+
+const DEFAULT_PORTAL_RATE_LIMIT_WINDOW_MS = 60_000;
+const DEFAULT_PORTAL_RATE_LIMIT_MAX = 10;
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -74,10 +78,34 @@ function getBillingPortalApiToken(): string | undefined {
   return typeof token === "string" && token.length > 0 ? token : undefined;
 }
 
+function getPositiveIntEnv(name: string, fallback: number): number {
+  const rawValue = process.env[name];
+  if (!rawValue) return fallback;
+
+  const parsed = Number.parseInt(rawValue, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 function extractBearerToken(header: string | undefined): string | undefined {
   if (!header) return undefined;
-  const match = header.match(/^Bearer\s+(.+)$/i);
-  return match?.[1];
+
+  const normalizedHeader = header.trim();
+  if (normalizedHeader.length <= 7 || normalizedHeader.slice(0, 7).toLowerCase() !== "bearer ") {
+    return undefined;
+  }
+
+  const token = normalizedHeader.slice(7).trim();
+  return token.length > 0 ? token : undefined;
+}
+
+function createBillingPortalLimiter() {
+  return rateLimit({
+    windowMs: getPositiveIntEnv("BILLING_PORTAL_RATE_LIMIT_WINDOW_MS", DEFAULT_PORTAL_RATE_LIMIT_WINDOW_MS),
+    max: getPositiveIntEnv("BILLING_PORTAL_RATE_LIMIT_MAX", DEFAULT_PORTAL_RATE_LIMIT_MAX),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { ok: false, error: "rate_limited" }
+  });
 }
 
 export function isEventProcessed(stripeEventId: string): boolean {
@@ -405,6 +433,7 @@ export function createBillingWebhookApp(input?: Stripe | BillingAppOptions): exp
   const client = options.stripeClient ?? new Stripe(secret as string);
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const createPortalSession = options.createPortalSession ?? createBillingPortalSession;
+  const billingPortalLimiter = createBillingPortalLimiter();
 
   const app = express();
 
@@ -412,7 +441,7 @@ export function createBillingWebhookApp(input?: Stripe | BillingAppOptions): exp
     res.json({ ok: true });
   });
 
-  app.post("/api/billing/portal", express.json(), async (req: Request, res: Response) => {
+  app.post("/api/billing/portal", billingPortalLimiter, express.json(), async (req: Request, res: Response) => {
     const expectedToken = getBillingPortalApiToken();
     if (!expectedToken) {
       res.status(503).json({ ok: false, error: "billing_portal_unavailable" });

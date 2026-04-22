@@ -101,3 +101,206 @@ Operator actions:
 - Never print secret keys in logs.
 - Never store card PAN/CVC locally.
 - Restrict Stripe Dashboard access to approved operators.
+
+## Stripe Test Mode End-to-End Validation
+
+This checklist validates that the webhook handler correctly processes real Stripe events, verifies signatures, and updates billing state. Run this once before treating billing as production-ready.
+
+When: after CI passes, before Billing Portal integration.
+Time: about 30 minutes.
+Environment: local Stripe test mode only.
+
+### Prerequisites
+
+1. Set Stripe test credentials only:
+	- `STRIPE_SECRET_KEY=sk_test_...`
+	- install Stripe CLI: `https://stripe.com/docs/stripe-cli`
+2. Start from a known billing database state:
+
+```bash
+npm run billing:migrate
+npm run billing:seed
+```
+
+3. Verify baseline state:
+
+```bash
+npm run billing:status -- --client example
+```
+
+Expected baseline: seeded client is `active` on plan `growth`.
+
+### Step 1: Start webhook server
+
+Terminal 1:
+
+```bash
+npm run billing:webhook-server
+```
+
+Expected:
+- server starts successfully
+- webhook route is available at `/api/webhooks/stripe`
+- health route responds at `/health`
+
+Leave this process running.
+
+### Step 2: Start Stripe CLI forwarder
+
+Terminal 2:
+
+```bash
+stripe listen --forward-to localhost:4000/api/webhooks/stripe
+```
+
+Expected: Stripe CLI prints a signing secret similar to `whsec_test_...`.
+
+Set that secret in the same shell used to start the server, or restart the server after exporting it:
+
+```bash
+$env:STRIPE_WEBHOOK_SECRET='whsec_test_...'
+```
+
+Leave Stripe CLI running.
+
+### Step 3: checkout.session.completed
+
+Terminal 3:
+
+```bash
+stripe trigger checkout.session.completed
+```
+
+Verify:
+- webhook server logs successful processing
+- `stripe_events` gets a new row
+- billing account is created or updated
+- Stripe customer or subscription IDs are persisted when present
+
+Check:
+
+```bash
+npm run billing:status -- --client example
+```
+
+Pass condition: event is accepted, signature verification succeeds, and account state is updated without error.
+
+### Step 4: invoice.paid
+
+Terminal 3:
+
+```bash
+stripe trigger invoice.paid
+```
+
+Verify:
+- billing status becomes `active`
+- `last_payment_at` is updated
+- provisioning log records an enabling or payment-received action
+- managed access decision is allowed
+
+Check:
+
+```bash
+npm run billing:status -- --client example
+```
+
+Pass condition: account is active and usable.
+
+### Step 5: invoice.payment_failed
+
+Terminal 3:
+
+```bash
+stripe trigger invoice.payment_failed
+```
+
+Verify:
+- billing status becomes `past_due`
+- provisioning log records the billing issue
+- managed access behaves according to current policy
+
+Check:
+
+```bash
+npm run billing:status -- --client example
+```
+
+Pass condition: `past_due` state is reflected consistently in status output and gating.
+
+### Step 6: customer.subscription.deleted
+
+Terminal 3:
+
+```bash
+stripe trigger customer.subscription.deleted
+```
+
+Verify:
+- billing status becomes `canceled`
+- provisioning log contains a disabling action
+- new managed runs are blocked
+- dashboard access follows the current canceled/read-only policy
+
+Check:
+
+```bash
+npm run billing:status -- --client example
+```
+
+Pass condition: canceled state is persisted and gating reflects it.
+
+### Step 7: Duplicate event idempotency
+
+Replay the same event if possible, or repeat a trigger to confirm duplicate deliveries do not double-apply state transitions.
+
+Verify:
+- no duplicate billing account rows
+- no duplicate provisioning actions for the same Stripe event ID
+- `stripe_events` uniqueness guard prevents double-processing
+
+Recommended check:
+
+```bash
+npm run billing:status -- --client example
+```
+
+Pass condition: second delivery is accepted as a no-op.
+
+### Step 8: Invalid signature rejection
+
+Temporarily set an incorrect webhook secret and send another Stripe event.
+
+Verify:
+- webhook route returns `400`
+- no billing state changes are written
+- no provisioning log entry is added
+
+Then restore the correct webhook secret.
+
+Pass condition: invalid signatures are rejected without mutation.
+
+### Record the result
+
+Capture a short verification note after the run:
+
+```markdown
+## Stripe CLI Validation Results
+
+Date: 2026-04-22
+Environment: local test mode
+
+Passed:
+- checkout.session.completed
+- invoice.paid
+- invoice.payment_failed
+- customer.subscription.deleted
+- duplicate event idempotency
+- invalid signature rejection
+
+Notes:
+- `past_due` currently blocks new managed runs
+- `canceled` preserves read-only dashboard access during grace period
+```
+
+Only move on to Billing Portal after this checklist passes once end to end.

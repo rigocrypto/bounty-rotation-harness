@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "hash": "a1b2c3d4",
   "severity": "High",
   "detector": "OracleFreshnessCheck",
   "chain": "base",

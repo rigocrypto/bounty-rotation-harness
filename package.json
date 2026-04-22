@@ -31,7 +31,7 @@
     "smoke:all": "npm run smoke && npm run smoke:report",
     "dashboard": "ts-node scripts/generateDashboard.ts",
     "dashboard:seed": "node scripts/seedSampleDb.mjs examples/sample-data/sample-results.db",
-    "dashboard:sample": "npm run dashboard:seed && ts-node scripts/generateDashboard.ts --db examples/sample-data/sample-results.db --triage examples/sample-data/sample-triage-result.json --out examples/sample-dashboard/overview.html --sample",
+    "dashboard:sample": "npm run dashboard:seed && ts-node scripts/generateDashboard.ts --db examples/sample-data/sample-results.db --triage examples/sample-data/sample-triage-result.json --proof-summaries examples/sample-data/sample-proof-summary.json --out examples/sample-dashboard/overview.html --sample",
     "pricing:proposal": "ts-node config/pricing.ts",
     "test:gmx-invariants:full": "cross-env GMX_ENABLE_REAL_MUTATIONS=true node scripts/runGmxInvariantSuite.js",
     "test:gmx-exploit-search:rotate": "powershell -ExecutionPolicy Bypass -File scripts/rotateAndSearch.ps1",

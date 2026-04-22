@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
 - Reproduction command blocks (bash and PowerShell) on detail pages
 - Evidence artifact links on detail pages (proof.json, summary.json, immunefi-report.md)
 - Back-navigation from detail pages to findings explorer
+- Security Score explanation panel with deterministic breakdown by severity
+- Scoring model version (v1) and interpretation guidance on overview dashboard
 
 ### Changed
 - Upgraded dashboard generator overview template to Control Center layout

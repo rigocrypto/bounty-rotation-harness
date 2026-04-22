@@ -69,6 +69,14 @@ type FindingRow = {
   protocol: string;
 };
 
+type OverviewScoreBreakdown = {
+  counts: Record<"critical" | "high" | "medium" | "low", number>;
+  penalties: Record<"critical" | "high" | "medium" | "low", number>;
+  totalPenalty: number;
+  finalScore: number;
+  version: "v1";
+};
+
 const SCORE_WEIGHTS: Record<FindingRow["severity"], number> = {
   critical: -25,
   high: -15,
@@ -478,12 +486,56 @@ function triageToFindings(triage: TriageResult | null): FindingRow[] {
   return rows;
 }
 
-function computeOverviewScore(findings: FindingRow[]): number {
-  let score = 100;
-  for (const finding of findings) {
-    score += SCORE_WEIGHTS[finding.severity] || 0;
+function computeOverviewScoreBreakdown(findings: FindingRow[]): OverviewScoreBreakdown {
+  const counts = buildSeverityCounts(findings);
+  const penalties = {
+    critical: counts.critical * Math.abs(SCORE_WEIGHTS.critical),
+    high: counts.high * Math.abs(SCORE_WEIGHTS.high),
+    medium: counts.medium * Math.abs(SCORE_WEIGHTS.medium),
+    low: counts.low * Math.abs(SCORE_WEIGHTS.low)
+  };
+
+  const totalPenalty = penalties.critical + penalties.high + penalties.medium + penalties.low;
+  const finalScore = Math.max(0, Math.min(100, 100 - totalPenalty));
+
+  return {
+    counts,
+    penalties,
+    totalPenalty,
+    finalScore,
+    version: "v1"
+  };
+}
+
+function renderScoreBreakdownHtml(breakdown: OverviewScoreBreakdown): string {
+  const hasFindings =
+    breakdown.counts.critical + breakdown.counts.high + breakdown.counts.medium + breakdown.counts.low > 0;
+
+  if (!hasFindings) {
+    return `
+          <p class="score-breakdown-empty">No findings in current result set.</p>
+          <p class="score-final">Final score: <span style="color:${scoreBadgeColor(100)}">100</span> / 100</p>`;
   }
-  return Math.max(0, Math.min(100, score));
+
+  const rows: string[] = [];
+  if (breakdown.counts.critical > 0) {
+    rows.push(`<li>Critical: ${breakdown.counts.critical} × −25 = −${breakdown.penalties.critical}</li>`);
+  }
+  if (breakdown.counts.high > 0) {
+    rows.push(`<li>High: ${breakdown.counts.high} × −15 = −${breakdown.penalties.high}</li>`);
+  }
+  if (breakdown.counts.medium > 0) {
+    rows.push(`<li>Medium: ${breakdown.counts.medium} × −5 = −${breakdown.penalties.medium}</li>`);
+  }
+  if (breakdown.counts.low > 0) {
+    rows.push(`<li>Low: ${breakdown.counts.low} × −1 = −${breakdown.penalties.low}</li>`);
+  }
+
+  return `
+          <ul class="score-breakdown-list">
+            ${rows.join("\n            ")}
+          </ul>
+          <p class="score-final">Final score: <span style="color:${scoreBadgeColor(breakdown.finalScore)}">${breakdown.finalScore}</span> / 100</p>`;
 }
 
 function buildSeverityCounts(findings: FindingRow[]): Record<FindingRow["severity"], number> {
@@ -1228,11 +1280,13 @@ function generateHtml(input: {
   chainLabel: string;
   isSample?: boolean;
 }): string {
-  const score = computeOverviewScore(input.findings);
+  const scoreBreakdown = computeOverviewScoreBreakdown(input.findings);
+  const score = scoreBreakdown.finalScore;
   const scoreColor = scoreBadgeColor(score);
   const scoreState = scoreLabel(score);
-  const severityCounts = buildSeverityCounts(input.findings);
+  const severityCounts = scoreBreakdown.counts;
   const criticalHigh = severityCounts.critical + severityCounts.high;
+  const scoreBreakdownHtml = renderScoreBreakdownHtml(scoreBreakdown);
   const trendSvg = buildTrendSvg(input.runs);
   const severityBars = buildSeverityBars(severityCounts);
   const findingsRows = buildFindingsRows(input.findings);
@@ -1336,6 +1390,89 @@ function generateHtml(input: {
       margin-top: 8px;
       color: var(--muted);
       font-size: 12px;
+    }
+    .score-explainer {
+      background: linear-gradient(180deg, rgba(20,34,62,0.98), rgba(14,24,43,0.98));
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    .score-explainer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .score-explainer h3 {
+      margin: 0;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+    }
+    .score-version {
+      border: 1px solid #335487;
+      border-radius: 999px;
+      color: #bed3ff;
+      background: #12244a;
+      padding: 3px 9px;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .score-summary {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .score-subcard {
+      border: 1px solid #2b3f67;
+      background: #0f1a32;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .score-subcard h4 {
+      margin: 0 0 7px;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .score-formula-list,
+    .score-breakdown-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #d7e4ff;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .score-breakdown-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .score-final {
+      margin: 10px 0 0;
+      font-weight: 700;
+      font-size: 13px;
+      color: #dbe7ff;
+    }
+    .score-note {
+      border: 1px dashed #365487;
+      border-radius: 10px;
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      background: rgba(10,20,40,0.42);
     }
     .panels {
       display: grid;
@@ -1478,6 +1615,7 @@ function generateHtml(input: {
     }
     @media (max-width: 1020px) {
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .score-grid { grid-template-columns: 1fr; }
       .panels { grid-template-columns: 1fr; }
     }
     @media (max-width: 680px) {
@@ -1523,6 +1661,35 @@ function generateHtml(input: {
         <div class="value">${criticalHigh}</div>
         <div class="hint">Critical ${severityCounts.critical} + High ${severityCounts.high}</div>
       </article>
+    </section>
+
+    <section class="score-explainer">
+      <div class="score-explainer-top">
+        <h3>How Security Score Works</h3>
+        <span class="score-version">Scoring ${scoreBreakdown.version}</span>
+      </div>
+      <p class="score-summary">
+        The Security Score starts at <strong>100</strong> and decreases by unresolved finding severity in the current result set.
+        The result is clamped between <strong>0</strong> and <strong>100</strong>.
+      </p>
+      <div class="score-grid">
+        <article class="score-subcard">
+          <h4>Severity Weights</h4>
+          <ul class="score-formula-list">
+            <li>Critical: −25</li>
+            <li>High: −15</li>
+            <li>Medium: −5</li>
+            <li>Low: −1</li>
+          </ul>
+        </article>
+        <article class="score-subcard">
+          <h4>Current Breakdown</h4>
+${scoreBreakdownHtml}
+        </article>
+      </div>
+      <div class="score-note">
+        This score reflects the severity of findings detected in the current result set. A score of 100 means no findings were detected; it does not mean no vulnerabilities exist. This metric is a deterministic trend signal for regression monitoring and triage prioritization, not a certification of protocol security.
+      </div>
     </section>
 
     <section class="panels">

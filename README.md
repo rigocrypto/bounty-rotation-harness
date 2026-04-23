@@ -1,5 +1,9 @@
 ﻿# GMX Audit Control Center
 
+<p align="center">
+  <img src="docs/assets/GMX-AUDITS-LOGO.jpeg" alt="GMX Audit Logo" width="280" />
+</p>
+
 Continuous security. Real economic impact. Submission ready.
 
 GMX Audit Control Center is a deterministic security suite for Web3 protocols focused on invariant hunting, continuous regression monitoring, explainable triage, and reproducible proof packaging.

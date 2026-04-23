@@ -95,6 +95,8 @@ You care about operational reliability:
 
 ![How It Works Dashboard](docs/assets/Bounty-rotation.jpeg)
 
+[Watch the product presentation video](docs/assets/GMX-AUDITS-Vid.mp4)
+
 1. Run deterministic fork execution at historical blocks (archive RPC required).
 2. Execute invariant suites and exploit-search checks.
 3. Generate triage with severity, stable identity key, content hash, and impact framing.

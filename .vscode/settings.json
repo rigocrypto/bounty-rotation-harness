@@ -29,6 +29,9 @@
     "AVALANCHE_RPC_URL": "https://api.avax.network/ext/bc/C/rpc",
     "ARBITRUM_RPC_URL": "https://arb1.arbitrum.io/rpc"
   },
+  "files.associations": {
+    "**/init_mantle_page.html": "plaintext"
+  },
   "gitlens.codeLens.enabled": true,
   "gitlens.hovers.enabled": true
 }

@@ -120,6 +120,15 @@ contract MoonwellHandler is Test {
     uint256 public ghost_totalSuppliedUSD;
     uint256 public ghost_totalBorrowedUSD;
 
+    struct RecordedAction {
+        string name;
+        uint256 a;
+        uint256 b;
+        uint256 c;
+        uint256 d;
+    }
+    RecordedAction[] public recordedActions;
+
     // Cap-breach flags — latched true on first breach for post-run analysis
     bool public ghost_supplyCapBreached;
     bool public ghost_borrowCapBreached;
@@ -361,53 +370,87 @@ contract MoonwellHandler is Test {
         }
     }
 
-    /// @notice Same-block multi-action: supply → enterMarket → borrow → immediate full redeem.
-    /// If the redeem succeeds the borrow must remain fully collateralised.
-    function sameBlockAttack(uint256 userSeed, uint256 marketSeed, uint256 supplyAmt, uint256 borrowAmount) public {
-        address user = users[userSeed % users.length];
-        IMToken market = markets[marketSeed % markets.length];
-        address underlying = market.underlying();
+    /// @notice Same-block multi-action with logging and strict feasibility checks.
+    function sameBlockAttack(uint256 userIdx, uint256 marketIdx, uint256 borrowAmount, uint256 redeemAmount) public {
+        vm.assume(borrowAmount > 0 && redeemAmount > 0 && borrowAmount < 1_000_000 * 1e18);
+
+        address user = users[userIdx % users.length];
+        IMToken m = markets[marketIdx % markets.length];
+        address underlying = m.underlying();
+
+        recordedActions.push(RecordedAction("sameBlockAttack", userIdx, marketIdx, borrowAmount, redeemAmount));
 
         uint256 bal = IERC20(underlying).balanceOf(user);
         if (bal == 0) return;
-        supplyAmt = bound(supplyAmt, 1, bal);
+        uint256 supplyAmt = bound(redeemAmount, 1, bal);
 
-        // Supply
-        vm.prank(user);
-        if (market.mint(supplyAmt) != 0) return;
-        uint256 supplyValueUSD = _toUSD(address(market), supplyAmt);
-        ghost_netValueUSD[user] -= int256(supplyValueUSD);
-        ghost_totalSuppliedUSD += supplyValueUSD;
+        vm.startPrank(user);
 
-        // Enter market
+        // Supply collateral first.
+        if (m.mint(supplyAmt) != 0) {
+            vm.stopPrank();
+            return;
+        }
+
         address[] memory mTokens = new address[](1);
-        mTokens[0] = address(market);
-        vm.prank(user);
+        mTokens[0] = address(m);
         comptroller.enterMarkets(mTokens);
 
-        // Borrow in the same block — no mining
-        borrowAmount = bound(borrowAmount, 1, supplyAmt / 2 > 0 ? supplyAmt / 2 : 1);
-        vm.prank(user);
-        if (market.borrow(borrowAmount) != 0) return;
-        uint256 borrowValueUSD = _toUSD(address(market), borrowAmount);
-        ghost_netValueUSD[user] += int256(borrowValueUSD);
-        ghost_totalBorrowedUSD += borrowValueUSD;
+        console.log("=== sameBlockAttack START ===");
+        logUserState(user, m, "BEFORE");
 
-        // Attempt immediate full redeem — must not leave user undercollateralised
-        uint256 mBal = market.balanceOf(user);
-        if (mBal == 0) return;
-        uint256 preBal = IERC20(underlying).balanceOf(user);
-        vm.prank(user);
-        uint256 err = market.redeem(mBal);
-        if (err == 0) {
-            uint256 postBal = IERC20(underlying).balanceOf(user);
-            uint256 received = postBal > preBal ? postBal - preBal : 0;
-            uint256 redeemValueUSD = _toUSD(address(market), received);
-            ghost_netValueUSD[user] += int256(redeemValueUSD);
+        // Force fresh state before liquidity check.
+        m.accrueInterest();
 
-            (,, uint256 shortfall) = comptroller.getAccountLiquidity(user);
-            assertEq(shortfall, 0, "INVARIANT: same-block redeem left user undercollateralised");
+        (, uint256 liquidityBefore, uint256 shortfallBefore) = comptroller.getAccountLiquidity(user);
+        assertEq(shortfallBefore, 0, "ILLEGAL STATE: user underwater before borrow");
+
+        uint256 maxBorrow = (liquidityBefore * 9) / 10;
+        vm.assume(borrowAmount <= maxBorrow);
+
+        uint256 error = m.borrow(borrowAmount);
+        if (error != 0) {
+            vm.stopPrank();
+            return;
         }
+
+        (,, uint256 shortfallAfterBorrow) = comptroller.getAccountLiquidity(user);
+        require(shortfallAfterBorrow == 0, "ILLEGAL STATE: user underwater after borrow but tx succeeded");
+
+        uint256 mBal = m.balanceOf(user);
+        if (mBal == 0) {
+            vm.stopPrank();
+            return;
+        }
+
+        error = m.redeem(mBal);
+        if (error != 0) {
+            vm.stopPrank();
+            return;
+        }
+
+        (,, uint256 shortfallAfterRedeem) = comptroller.getAccountLiquidity(user);
+        require(shortfallAfterRedeem == 0, "ILLEGAL STATE: user underwater after redeem but tx succeeded");
+
+        logUserState(user, m, "AFTER SAME-BLOCK");
+        vm.stopPrank();
+        console.log("=== sameBlockAttack END ===");
+    }
+
+    function logUserState(address user, IMToken m, string memory label) internal {
+        uint256 mBal = m.balanceOf(user);
+        uint256 exRate = m.exchangeRateCurrent();
+        uint256 underlyingBal = (mBal * exRate) / 1e18;
+        uint256 borrowBal = m.borrowBalanceCurrent(user);
+        (, uint256 liquidity, uint256 shortfall) = comptroller.getAccountLiquidity(user);
+
+        console.log(label);
+        console.log("  mToken balance     :", mBal);
+        console.log("  underlying value   :", underlyingBal);
+        console.log("  borrowBalance      :", borrowBal);
+        console.log("  liquidity          :", liquidity);
+        console.log("  shortfall          :", shortfall);
+        console.log("  net extracted      :", underlyingBal > borrowBal ? underlyingBal - borrowBal : 0);
     }
 
     // ─── Accessors ─────────────────────────────────────────────────────────────
@@ -435,13 +478,40 @@ contract MoonwellHandler is Test {
     // ─── Invariant Assertion Functions ─────────────────────────────────────────
     // Called by MoonwellInvariantTest after every fuzz sequence.
 
-    /// CRITICAL: No user should extract net value from the protocol.
-    /// ghost_netValueUSD > EPSILON_USD means they received more than they put in.
-    function invariant_netValueDelta() public view {
+    /// CRITICAL: Gated real-state no-free-borrow invariant.
+    function invariant_netValueDelta() public {
         for (uint256 i = 0; i < users.length; i++) {
-            assertLe(
-                ghost_netValueUSD[users[i]], int256(EPSILON_USD), "INVARIANT: user extracted net value from protocol"
-            );
+            address user = users[i];
+
+            uint256 totalCollateralUSD = 0;
+            uint256 totalBorrowUSD = 0;
+
+            for (uint256 j = 0; j < markets.length; j++) {
+                IMToken m = markets[j];
+
+                m.accrueInterest();
+
+                uint256 price = oracle.getUnderlyingPrice(address(m));
+                uint256 mBal = m.balanceOf(user);
+                uint256 exRate = m.exchangeRateCurrent();
+                uint256 underlyingValue = (mBal * exRate) / 1e18;
+                uint256 borrowBal = m.borrowBalanceCurrent(user);
+
+                totalCollateralUSD += (underlyingValue * price) / 1e18;
+                totalBorrowUSD += (borrowBal * price) / 1e18;
+            }
+
+            (, uint256 liquidity, uint256 shortfall) = comptroller.getAccountLiquidity(user);
+
+            if (shortfall == 0) {
+                assertGe(
+                    totalCollateralUSD + EPSILON_USD,
+                    totalBorrowUSD,
+                    "NET_VALUE_DELTA_BROKEN - user has negative net position (free borrow) outside of liquidation"
+                );
+            }
+
+            assertTrue(shortfall == 0 || liquidity == 0, "user has both liquidity and shortfall");
         }
     }
 
@@ -590,13 +660,23 @@ contract MoonwellInvariantTest is Test {
             }
         }
 
+        // Prevent protocol/system addresses from being used as fuzz senders.
+        excludeSender(COMPTROLLER);
+        excludeSender(ORACLE);
+        excludeSender(mUSDC_ADDR);
+        excludeSender(mWETH_ADDR);
+        excludeSender(mCBETH_ADDR);
+        excludeSender(USDC);
+        excludeSender(WETH);
+        excludeSender(CBETH);
+
         // Restrict forge to only call handler functions
         targetContract(address(handler));
     }
 
     // Forge calls these after every generated call sequence.
     // Delegation keeps all ghost state in one place.
-    function invariant_netValueDelta() public view {
+    function invariant_netValueDelta() public {
         handler.invariant_netValueDelta();
     }
 

@@ -1,0 +1,35 @@
+name: Billing Daily Summary
+
+on:
+  schedule:
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  daily-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run daily summary
+        env:
+          BILLING_ALERT_EMAIL_TO: ${{ secrets.BILLING_ALERT_EMAIL_TO }}
+          BILLING_ALERT_EMAIL_FROM: ${{ secrets.BILLING_ALERT_EMAIL_FROM }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          BILLING_DAILY_SUMMARY_LOOKBACK_HOURS: "24"
+        run: npm run billing:daily-summary

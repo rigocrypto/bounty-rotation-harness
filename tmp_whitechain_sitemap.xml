@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+			<url>
+				<loc>https://docs.whitechain.io</loc>
+				<priority>0.84</priority>
+				<lastmod>2026-01-21T08:18:52.000Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/general/background-and-vision</loc>
+				<priority>0.84</priority>
+				<lastmod>2026-01-22T08:55:29.361Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/general/architecture</loc>
+				<priority>0.84</priority>
+				<lastmod>2024-03-09T21:01:52.837Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/general/wallet-configuration</loc>
+				<priority>0.84</priority>
+				<lastmod>2026-01-21T08:18:52.000Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/usdwbt/getting-usdwbt</loc>
+				<priority>0.84</priority>
+				<lastmod>2026-01-22T08:47:17.173Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/usdwbt/testnet-faucet</loc>
+				<priority>0.84</priority>
+				<lastmod>2024-03-19T13:02:00.736Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/smart-contracts/smart-contracts-deployment</loc>
+				<priority>0.84</priority>
+				<lastmod>2026-01-22T08:47:17.173Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/smart-contracts/smart-contracts-verification</loc>
+				<priority>0.84</priority>
+				<lastmod>2024-02-07T15:37:59.027Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/smart-contracts/proxy-contract-verification</loc>
+				<priority>0.84</priority>
+				<lastmod>2024-02-07T10:55:51.041Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/run-a-node/mainnet-node</loc>
+				<priority>0.84</priority>
+				<lastmod>2026-01-22T08:47:17.173Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/bridge/bridge</loc>
+				<priority>0.84</priority>
+				<lastmod>2026-02-25T16:19:22.965Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/wb-soul/wb-soul-ecosystem</loc>
+				<priority>0.84</priority>
+				<lastmod>2026-01-22T08:59:03.899Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/wb-soul/wb-soul-ecosystem/wb-soul-ecosystem-implementation</loc>
+				<priority>0.7</priority>
+				<lastmod>2024-02-07T09:07:42.645Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/wb-soul/wb-soul-ecosystem/wb-soul-explained</loc>
+				<priority>0.7</priority>
+				<lastmod>2024-02-07T11:07:26.824Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/wb-soul/wb-soul-ecosystem/wb-soul-features</loc>
+				<priority>0.7</priority>
+				<lastmod>2024-02-07T11:09:41.178Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/wb-soul/souldrop</loc>
+				<priority>0.84</priority>
+				<lastmod>2026-01-22T08:59:03.899Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/wb-soul/souldrop/the-dynamic-rewards-mechanism-how-it-works</loc>
+				<priority>0.7</priority>
+				<lastmod>2024-02-06T13:53:10.460Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/wb-soul/souldrop/table-with-period-reward-percentage-for-each-level</loc>
+				<priority>0.7</priority>
+				<lastmod>2024-05-20T13:14:55.726Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/wb-soul/souldrop/reward-calculation-and-full-holding-periods</loc>
+				<priority>0.7</priority>
+				<lastmod>2024-02-07T11:14:09.962Z</lastmod>
+</url>
+
+			<url>
+				<loc>https://docs.whitechain.io/wb-soul/souldrop-user-manual</loc>
+				<priority>0.84</priority>
+				<lastmod>2024-02-07T11:16:32.173Z</lastmod>
+</url>
+
+
+</urlset>
+

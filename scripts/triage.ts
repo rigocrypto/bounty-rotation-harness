@@ -28,6 +28,12 @@ export interface ProofEntry {
   severity: "Critical" | "High" | "Medium";
 }
 
+const SEVERITY_ORDER: Record<ProofEntry["severity"], number> = {
+  Critical: 0,
+  High: 1,
+  Medium: 2
+};
+
 export interface TriageResult {
   schema_version: 1;
   scanned_at: string;
@@ -142,7 +148,10 @@ export function triageProofsWithPrice(
   const validate = ajv.compile(schema);
 
   const entries: ProofEntry[] = [];
-  const files = fs.readdirSync(proofDir).filter((f) => f.endsWith(".json") && !f.includes("gitkeep"));
+  const files = fs
+    .readdirSync(proofDir)
+    .filter((f) => f.endsWith(".json") && !f.includes("gitkeep"))
+    .sort((left, right) => left.localeCompare(right));
 
   for (const file of files) {
     const fullPath = path.join(proofDir, file);
@@ -189,8 +198,16 @@ export function triageProofsWithPrice(
     }
   }
 
-  const order = { Critical: 0, High: 1, Medium: 2 };
-  entries.sort((a, b) => order[a.severity] - order[b.severity]);
+  entries.sort((left, right) => {
+    const severityDelta = SEVERITY_ORDER[left.severity] - SEVERITY_ORDER[right.severity];
+    if (severityDelta !== 0) {
+      return severityDelta;
+    }
+
+    return [left.chain, String(left.block), left.detector, left.content_hash, left.file].join("\u0000").localeCompare(
+      [right.chain, String(right.block), right.detector, right.content_hash, right.file].join("\u0000")
+    );
+  });
 
   const criticalCount = entries.filter((e) => e.severity === "Critical").length;
   const highCount = entries.filter((e) => e.severity === "High").length;

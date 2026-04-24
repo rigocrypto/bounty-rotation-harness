@@ -23,6 +23,10 @@ interface ProofJson {
   };
 }
 
+function sortedEntries(values: Record<string, string>): Array<[string, string]> {
+  return Object.entries(values).sort(([left], [right]) => left.localeCompare(right));
+}
+
 function formatImpactLine(raw: string, priceUSD: number | undefined, role: "attacker" | "pool"): string {
   if (!priceUSD || !Number.isFinite(priceUSD)) {
     return `${raw} wei`;
@@ -65,7 +69,6 @@ export function generateImmunefiReport(
   opts: { priceUSD?: number; packageDir?: string } = {}
 ): string {
   const severity = computeSeverity({ userNet: proof.userNet, poolNet: proof.poolNet });
-  const timestamp = new Date().toISOString();
   const chain = proof.chain.toUpperCase();
 
   const envVars: Record<string, string> = {
@@ -73,12 +76,13 @@ export function generateImmunefiReport(
     FORK_BLOCK: String(proof.block),
     ...(proof.env || {})
   };
+  const envEntries = sortedEntries(envVars);
 
-  const bashEnv = Object.entries(envVars)
+  const bashEnv = envEntries
     .map(([k, v]) => `export ${k}="${v}"`)
     .join("\n");
 
-  const pwshEnv = Object.entries(envVars)
+  const pwshEnv = envEntries
     .map(([k, v]) => `$env:${k} = "${v}"`)
     .join("\n");
 
@@ -121,7 +125,6 @@ export function generateImmunefiReport(
 Severity: ${severityBadge(severity)}
 Chain: ${chain}
 Block: ${proof.block}
-Generated: ${timestamp}
 
 ## Executive Summary
 
@@ -145,7 +148,7 @@ userNet > 0 means attacker value extraction. poolNet < 0 means pool loss.
 - Chain: ${chain}
 - Fork block: ${proof.block}
 - Detector invariant: ${proof.detector}
-${proof.env ? `- Additional context: ${JSON.stringify(proof.env)}` : ""}
+${proof.env ? `- Additional context: ${JSON.stringify(Object.fromEntries(sortedEntries(proof.env)))}` : ""}
 
 ## Steps to Reproduce
 

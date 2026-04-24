@@ -12,6 +12,97 @@ GMX Audit Control Center is a deterministic security suite for Web3 protocols fo
 
 **Managed plan (Growth $499/mo):** [Checkout on Stripe](https://buy.stripe.com/fZu9AT3Np2Sp48l4NygnK00)
 
+Digital services are delivered remotely for protocol, smart contract, and infrastructure teams.
+
+---
+
+## Plans and Pricing
+
+### Growth - CI Basic
+
+Price: $499/month
+
+For teams that need a reliable quality gate and recurring monitoring coverage.
+
+Includes:
+
+- Scheduled CI monitoring
+- Failure triage and notification workflows
+- Artifact tracking and reporting
+- Multi-chain monitoring support
+
+Buy: [Buy Growth - CI Basic](https://buy.stripe.com/fZu9AT3Np2Sp48l4NygnK00)
+
+### Regression Pro
+
+Price: $2,500/month
+
+For teams that need broader regression protection and stronger release confidence.
+
+Includes:
+
+- Expanded regression coverage
+- Priority issue triage
+- Higher-signal alerting and operational visibility
+- Release risk reduction support
+
+Buy: [Buy Regression Pro]([BUY_REGRESSION_LINK])
+
+### Progression Pro
+
+Price: Custom / premium tier
+
+For teams that need broader operational coverage, higher-touch support, and tailored release controls.
+
+Includes:
+
+- Expanded monitoring scope
+- Faster escalation paths
+- Custom workflow support
+- Premium delivery and reporting expectations
+
+Contact: [Contact for Progression Pro]([BOOK_CALL_OR_CONTACT_LINK])
+
+### One-Time Audit / Advisory
+
+Price: Custom or fixed-scope engagement
+
+For teams that need a one-time security review, release review, or engineering advisory engagement.
+
+Includes:
+
+- Scoped one-time engagement
+- Findings summary and recommendations
+- Delivery window confirmed before work starts
+
+Request: [Request One-Time Review]([BOOK_CALL_OR_CONTACT_LINK])
+
+---
+
+## How to Buy
+
+1. Choose a plan or request a scoped engagement.
+2. Complete checkout or contact us for a custom quote.
+3. We confirm scope, access requirements, delivery window, and kickoff date.
+4. Services are delivered digitally with outputs, alerts, and reporting artifacts based on the selected plan.
+
+---
+
+## Delivery Model
+
+- Services are delivered digitally and remotely.
+- Delivery includes monitoring outputs, alerts, triage artifacts, reporting, and scoped engineering support.
+- For subscription plans, service begins after payment confirmation and onboarding.
+- For one-time engagements, scope and delivery expectations are agreed before work begins.
+
+---
+
+## Contact
+
+- Email: [[YOUR_CONTACT_EMAIL]](mailto:[YOUR_CONTACT_EMAIL])
+- Product: GMX Audit Control Center
+- Sales / scope requests: [Request access or demo]([BOOK_CALL_OR_CONTACT_LINK])
+
 ---
 
 ## What It Is
@@ -148,6 +239,8 @@ Includes:
 - Token-protected dashboards
 - Alerts and artifact delivery per run
 - Retention pruning, retries, overlap locks
+
+Managed service buyers typically choose one of the commercial plans above, then complete onboarding for protocol scope, alert routing, and reporting cadence.
 
 Details: [Managed service docs](docs/managed-service.md)
 

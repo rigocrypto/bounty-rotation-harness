@@ -46,7 +46,7 @@ Includes:
 - Higher-signal alerting and operational visibility
 - Release risk reduction support
 
-Buy: [Buy Regression Pro]([BUY_REGRESSION_LINK])
+Buy: [Buy Regression Pro](https://buy.stripe.com/28E3cv6ZBcsZeMZ93OgnK01)
 
 ### Progression Pro
 
@@ -61,7 +61,7 @@ Includes:
 - Custom workflow support
 - Premium delivery and reporting expectations
 
-Contact: [Contact for Progression Pro]([BOOK_CALL_OR_CONTACT_LINK])
+Contact: [Contact for Progression Pro](https://rigocrypto.github.io/bounty-rotation-harness/#contact)
 
 ### One-Time Audit / Advisory
 
@@ -75,7 +75,7 @@ Includes:
 - Findings summary and recommendations
 - Delivery window confirmed before work starts
 
-Request: [Request One-Time Review]([BOOK_CALL_OR_CONTACT_LINK])
+Request: [Request One-Time Review](https://rigocrypto.github.io/bounty-rotation-harness/#contact)
 
 ---
 
@@ -99,9 +99,9 @@ Request: [Request One-Time Review]([BOOK_CALL_OR_CONTACT_LINK])
 
 ## Contact
 
-- Email: [[YOUR_CONTACT_EMAIL]](mailto:[YOUR_CONTACT_EMAIL])
+- Email: [rigovivas71@gmail.com](mailto:rigovivas71@gmail.com)
 - Product: GMX Audit Control Center
-- Sales / scope requests: [Request access or demo]([BOOK_CALL_OR_CONTACT_LINK])
+- Sales / scope requests: [Request access or demo](https://rigocrypto.github.io/bounty-rotation-harness/#lead-capture)
 
 ---
 

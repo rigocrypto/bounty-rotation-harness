@@ -221,8 +221,8 @@ function PricingSection() {
       ],
       cta: 'Talk to Sales',
       ctaStyle: 'bg-[#06b6d4]/10 hover:bg-[#06b6d4]/20 text-[#06b6d4] border border-[#06b6d4]/30',
-      href: '#contact',
-      external: false,
+      href: 'https://buy.stripe.com/28E3cv6ZBcsZeMZ93OgnK01',
+      external: true,
     },
     {
       title: 'Regression Pro',

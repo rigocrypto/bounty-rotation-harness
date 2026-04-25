@@ -66,8 +66,8 @@ Latest result:
 
 What this flag bypasses:
 
-- In [test/gmx-invariants/withdrawalLifecycle.spec.ts](test/gmx-invariants/withdrawalLifecycle.spec.ts#L79) and [test/gmx-invariants/withdrawalLifecycle.spec.ts](test/gmx-invariants/withdrawalLifecycle.spec.ts#L116), tests call `this.skip()` when chain is avalanche and `GMX_ALLOW_AVA_ORACLE_EXECUTE !== "1"`.
-- In [test/gmx-invariants/orderFeeEscape.spec.ts](test/gmx-invariants/orderFeeEscape.spec.ts#L130), the deterministic executeOrder test uses the same guard.
+- In [../test/gmx-invariants/withdrawalLifecycle.spec.ts](../test/gmx-invariants/withdrawalLifecycle.spec.ts#L79) and [../test/gmx-invariants/withdrawalLifecycle.spec.ts](../test/gmx-invariants/withdrawalLifecycle.spec.ts#L116), tests call `this.skip()` when chain is avalanche and `GMX_ALLOW_AVA_ORACLE_EXECUTE !== "1"`.
+- In [../test/gmx-invariants/orderFeeEscape.spec.ts](../test/gmx-invariants/orderFeeEscape.spec.ts#L130), the deterministic executeOrder test uses the same guard.
 - This bypasses test-level skip logic only; it does not alter protocol role checks or contract accounting logic.
 
 ## Gate D (Nice, but high value): Slither reentrancy/delegatecall triage
@@ -116,9 +116,9 @@ Exploitability triage for high-signal `arbitrary-send-*`:
 
 Router plugin role governance note:
 
-- `onlyRouterPlugin` resolves via `RoleStore.hasRole(..., Role.ROUTER_PLUGIN)` in [gmx-synthetics/contracts/role/RoleModule.sol](gmx-synthetics/contracts/role/RoleModule.sol#L91).
-- Role grants are admin-only in [gmx-synthetics/contracts/role/RoleStore.sol](gmx-synthetics/contracts/role/RoleStore.sol#L44).
-- Timelock role grant signaling path exists in [gmx-synthetics/contracts/config/TimelockConfig.sol](gmx-synthetics/contracts/config/TimelockConfig.sol#L52).
+- `onlyRouterPlugin` resolves via `RoleStore.hasRole(..., Role.ROUTER_PLUGIN)` in [../gmx-synthetics/contracts/role/RoleModule.sol](../gmx-synthetics/contracts/role/RoleModule.sol#L91).
+- Role grants are admin-only in [../gmx-synthetics/contracts/role/RoleStore.sol](../gmx-synthetics/contracts/role/RoleStore.sol#L44).
+- Timelock role grant signaling path exists in [../gmx-synthetics/contracts/config/TimelockConfig.sol](../gmx-synthetics/contracts/config/TimelockConfig.sol#L52).
 
 Oracle detector mix (important):
 
@@ -129,7 +129,7 @@ Oracle detector mix (important):
 
 Deterministic probe added:
 
-- [test/gmx-invariants/accessControlProbe.spec.ts](test/gmx-invariants/accessControlProbe.spec.ts)
+- [../test/gmx-invariants/accessControlProbe.spec.ts](../test/gmx-invariants/accessControlProbe.spec.ts)
 
 Execution command:
 

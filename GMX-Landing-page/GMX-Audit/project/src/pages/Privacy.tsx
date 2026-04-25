@@ -90,7 +90,7 @@ export default function Privacy({ onNavigate }: PrivacyProps) {
             <p className="text-[#94a3b8] leading-relaxed">
               For privacy-related requests or questions, contact us at:
             </p>
-            <p className="text-[#0ea5e9] mt-2">contact@gmxaudit.com</p>
+            <p className="text-[#0ea5e9] mt-2">rigovivas71@gmail.com</p>
             <p className="text-[#94a3b8] mt-1">GMX Audit Control Center</p>
           </section>
         </div>

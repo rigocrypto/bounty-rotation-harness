@@ -43,7 +43,7 @@ export default function Terms({ onNavigate }: TermsProps) {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">3. Refunds</h2>
             <p className="text-[#94a3b8] leading-relaxed">
-              Monthly subscription fees are non-refundable except where required by applicable law. If you believe a billing error has occurred, contact us within 30 days of the charge at contact@gmxaudit.com and we will investigate promptly.
+              Monthly subscription fees are non-refundable except where required by applicable law. If you believe a billing error has occurred, contact us within 30 days of the charge at rigovivas71@gmail.com and we will investigate promptly.
             </p>
             <p className="text-[#94a3b8] leading-relaxed mt-3">
               For one-time advisory engagements, refunds may be available if work has not commenced. Once an engagement has begun, fees for work already delivered are non-refundable. Disputes regarding one-time engagements should be raised within 14 days of delivery.
@@ -67,7 +67,7 @@ export default function Terms({ onNavigate }: TermsProps) {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">6. Cancellation</h2>
             <p className="text-[#94a3b8] leading-relaxed">
-              You may cancel your subscription at any time by contacting us at contact@gmxaudit.com. Cancellations take effect at the end of the current billing period. You will retain access to services through the end of the paid period. We reserve the right to terminate services for non-payment or violation of these terms.
+              You may cancel your subscription at any time by contacting us at rigovivas71@gmail.com. Cancellations take effect at the end of the current billing period. You will retain access to services through the end of the paid period. We reserve the right to terminate services for non-payment or violation of these terms.
             </p>
           </section>
 
@@ -90,7 +90,7 @@ export default function Terms({ onNavigate }: TermsProps) {
             <p className="text-[#94a3b8] leading-relaxed">
               For questions about these terms or your service agreement, contact us at:
             </p>
-            <p className="text-[#0ea5e9] mt-2">contact@gmxaudit.com</p>
+            <p className="text-[#0ea5e9] mt-2">rigovivas71@gmail.com</p>
             <p className="text-[#94a3b8] mt-1">GMX Audit Control Center</p>
           </section>
         </div>

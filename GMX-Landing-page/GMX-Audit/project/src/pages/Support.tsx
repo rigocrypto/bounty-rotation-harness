@@ -19,7 +19,7 @@ export default function Support({ onNavigate }: SupportProps) {
     {
       icon: <XCircle className="w-5 h-5 text-[#f59e0b]" />,
       q: 'How do I cancel my subscription?',
-      a: 'Email contact@gmxaudit.com with your cancellation request. Cancellations take effect at the end of the current billing period. You retain full access until then.',
+      a: 'Email rigovivas71@gmail.com with your cancellation request. Cancellations take effect at the end of the current billing period. You retain full access until then.',
     },
     {
       icon: <HelpCircle className="w-5 h-5 text-[#0ea5e9]" />,
@@ -56,8 +56,8 @@ export default function Support({ onNavigate }: SupportProps) {
           <div className="bg-[#0a1628] border border-[#1a2f4a] rounded-lg p-6">
             <Mail className="w-6 h-6 text-[#0ea5e9] mb-3" />
             <h3 className="text-white font-semibold mb-1">Email Support</h3>
-            <a href="mailto:contact@gmxaudit.com" className="text-[#0ea5e9] hover:text-[#38bdf8] text-sm transition-colors">
-              contact@gmxaudit.com
+            <a href="mailto:rigovivas71@gmail.com" className="text-[#0ea5e9] hover:text-[#38bdf8] text-sm transition-colors">
+              rigovivas71@gmail.com
             </a>
           </div>
           <div className="bg-[#0a1628] border border-[#1a2f4a] rounded-lg p-6">
@@ -86,7 +86,7 @@ export default function Support({ onNavigate }: SupportProps) {
             Reach out directly and a member of our team will get back to you.
           </p>
           <a
-            href="mailto:contact@gmxaudit.com"
+            href="mailto:rigovivas71@gmail.com"
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0ea5e9] hover:bg-[#0284c7] text-white text-sm font-medium rounded transition-colors"
           >
             <Mail className="w-4 h-4" />

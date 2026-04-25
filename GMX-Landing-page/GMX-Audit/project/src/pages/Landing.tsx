@@ -221,8 +221,8 @@ function PricingSection() {
       ],
       cta: 'Talk to Sales',
       ctaStyle: 'bg-[#06b6d4]/10 hover:bg-[#06b6d4]/20 text-[#06b6d4] border border-[#06b6d4]/30',
-      href: 'https://buy.stripe.com/28E3cv6ZBcsZeMZ93OgnK01',
-      external: true,
+      href: '#contact',
+      external: false,
     },
     {
       title: 'Regression Pro',
@@ -241,8 +241,8 @@ function PricingSection() {
       ],
       cta: 'Buy Regression Pro',
       ctaStyle: 'bg-[#10b981] hover:bg-[#059669] text-white shadow-lg shadow-[#10b981]/20',
-      href: '#contact',
-      external: false,
+      href: 'https://buy.stripe.com/28E3cv6ZBcsZeMZ93OgnK01',
+      external: true,
     },
     {
       title: 'One-Time Audit / Advisory',
@@ -634,8 +634,8 @@ function ContactSection() {
               </div>
               <div>
                 <p className="text-[#475569] text-xs uppercase tracking-wider mb-0.5">Email</p>
-                <a href="mailto:contact@gmxaudit.com" className="text-white hover:text-[#0ea5e9] transition-colors text-sm">
-                  contact@gmxaudit.com
+                <a href="mailto:rigovivas71@gmail.com" className="text-white hover:text-[#0ea5e9] transition-colors text-sm">
+                  rigovivas71@gmail.com
                 </a>
               </div>
             </div>

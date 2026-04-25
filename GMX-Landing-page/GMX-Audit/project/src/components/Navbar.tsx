@@ -23,6 +23,18 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSectionNavigate = (href: string) => {
+    if (currentPage !== 'home') {
+      onNavigate('home');
+      setTimeout(() => {
+        document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return;
+    }
+
+    document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#050d1a]/95 backdrop-blur-sm border-b border-[#1a2f4a]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -54,9 +66,11 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
               </a>
             ))}
             <a
-              href="https://buy.stripe.com/fZu9AT3Np2Sp48l4NygnK00"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#pricing"
+              onClick={(e) => {
+                e.preventDefault();
+                handleSectionNavigate('#pricing');
+              }}
               className="px-4 py-1.5 bg-[#0ea5e9] hover:bg-[#0284c7] text-white text-sm font-medium rounded transition-colors"
             >
               View Plans
@@ -85,9 +99,12 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
             </a>
           ))}
           <a
-            href="https://buy.stripe.com/fZu9AT3Np2Sp48l4NygnK00"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#pricing"
+            onClick={(e) => {
+              e.preventDefault();
+              setMobileOpen(false);
+              handleSectionNavigate('#pricing');
+            }}
             className="px-4 py-2 bg-[#0ea5e9] hover:bg-[#0284c7] text-white text-sm font-medium rounded text-center transition-colors"
           >
             View Plans

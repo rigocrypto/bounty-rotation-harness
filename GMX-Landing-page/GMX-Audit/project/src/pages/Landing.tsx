@@ -12,6 +12,7 @@ interface LandingProps {
 
 function HeroSection() {
   const heroVideoSrc = '/hero-preview.mp4';
+  const heroImageSrc = '/Bounty-rotation.jpeg';
   const [hasHeroVideo, setHasHeroVideo] = useState(true);
 
   return (
@@ -93,7 +94,7 @@ function HeroSection() {
 
               <div className="relative rounded-2xl overflow-hidden border border-[#1a2f4a] shadow-2xl">
                 <img
-                  src="./Bounty-rotation.jpeg"
+                  src={heroImageSrc}
                   alt="GMX Audit Security Dashboard"
                   className="w-full h-auto object-cover"
                 />

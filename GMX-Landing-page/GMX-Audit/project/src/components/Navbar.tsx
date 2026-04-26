@@ -37,7 +37,7 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#050d1a]/95 backdrop-blur-sm border-b border-[#1a2f4a]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 md:h-16">
           <button
             onClick={handleHomeClick}
@@ -78,22 +78,23 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
           </div>
 
           <button
-            className="md:hidden text-[#94a3b8] hover:text-white"
+            className="md:hidden p-2 text-[#94a3b8] hover:text-white"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           >
-            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden bg-[#050d1a] border-b border-[#1a2f4a] px-4 py-3 flex flex-col gap-3">
+        <div className="md:hidden bg-[#050d1a] border-b border-[#1a2f4a] px-3 py-3 flex flex-col gap-2.5">
           {navLinks.map((link) => (
             <a
               key={link.label}
               href={currentPage === 'home' ? link.href : '#'}
               onClick={() => setMobileOpen(false)}
-              className="text-[#94a3b8] hover:text-white text-sm transition-colors"
+              className="text-[#94a3b8] hover:text-white text-base py-1.5 transition-colors"
             >
               {link.label}
             </a>
@@ -105,7 +106,7 @@ export default function Navbar({ currentPage, onNavigate }: NavbarProps) {
               setMobileOpen(false);
               handleSectionNavigate('#pricing');
             }}
-            className="px-4 py-2 bg-[#0ea5e9] hover:bg-[#0284c7] text-white text-sm font-medium rounded text-center transition-colors"
+            className="px-4 py-3 bg-[#0ea5e9] hover:bg-[#0284c7] text-white text-base font-medium rounded text-center transition-colors"
           >
             View Plans
           </a>

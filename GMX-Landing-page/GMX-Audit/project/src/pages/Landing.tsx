@@ -5,6 +5,7 @@ import {
   Terminal, Lock, BarChart2, Zap, Users, Server
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import Navbar from '../components/Navbar';
 
 interface LandingProps {
   onNavigate: (page: string) => void;
@@ -16,7 +17,7 @@ function HeroSection() {
   const [hasHeroVideo, setHasHeroVideo] = useState(true);
 
   return (
-    <section className="relative min-h-[auto] lg:min-h-screen flex items-start lg:items-center pt-7 max-[380px]:pt-4 sm:pt-14 lg:pt-16 overflow-hidden">
+    <section className="relative min-h-[auto] lg:min-h-screen flex items-start lg:items-center pt-6 max-[380px]:pt-4 sm:pt-14 lg:pt-16 pb-6 sm:pb-0 overflow-hidden">
       <div className="absolute inset-0 bg-[#050d1a]">
         <div className="absolute inset-0 opacity-5 bg-[linear-gradient(rgba(14,165,233,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(14,165,233,0.3)_1px,transparent_1px)] bg-[length:60px_60px]" />
         <div className="absolute right-0 top-0 w-1/2 h-full opacity-20 bg-gradient-to-l from-[#0ea5e9]/10 to-transparent" />
@@ -39,39 +40,39 @@ function HeroSection() {
               Security monitoring, CI coverage, and regression support for teams shipping critical infrastructure.
             </p>
 
-            <p className="text-[0.95rem] sm:text-base text-[#64748b] mb-4 sm:mb-10 leading-relaxed max-w-none sm:max-w-lg text-center lg:text-left">
+            <p className="hidden sm:block text-[0.95rem] sm:text-base text-[#64748b] mb-3 sm:mb-10 leading-relaxed max-w-none sm:max-w-lg text-center lg:text-left">
               GMX Audit Control Center helps engineering and protocol teams improve release confidence with monitoring, CI validation, regression coverage, and audit-oriented operational support. We provide digital security and engineering support services for teams that need reliable release controls, faster issue detection, and clearer operational visibility.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-2 max-[380px]:gap-1.5 sm:gap-3 w-full lg:w-auto justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-2.5 max-[380px]:gap-2 sm:gap-3 w-full sm:w-auto justify-center lg:justify-start">
               <a
                 href="#pricing"
-                className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-[#0ea5e9]/20"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 sm:py-3 bg-[#0ea5e9] hover:bg-[#0284c7] text-white text-base sm:text-sm font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-[#0ea5e9]/20"
               >
                 View Plans
                 <ArrowRight className="w-4 h-4" />
               </a>
               <a
                 href="#lead-capture"
-                className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 bg-transparent hover:bg-[#0a1628] text-white font-medium rounded-lg border border-[#1a2f4a] hover:border-[#0ea5e9]/50 transition-all duration-200"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 sm:py-3 bg-transparent hover:bg-[#0a1628] text-white text-base sm:text-sm font-medium rounded-lg border border-[#1a2f4a] hover:border-[#0ea5e9]/50 transition-all duration-200"
               >
                 Request Access
               </a>
               <a
                 href="#contact"
-                className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 bg-transparent hover:bg-[#0a1628] text-[#94a3b8] hover:text-white font-medium rounded-lg transition-all duration-200"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 text-base sm:text-sm bg-transparent hover:bg-[#0a1628] text-[#94a3b8] hover:text-white font-medium rounded-lg transition-all duration-200"
               >
                 Contact Us
               </a>
             </div>
           </div>
 
-          <div className="relative flex justify-center lg:justify-end mt-1 max-[380px]:mt-0 sm:mt-8 lg:mt-0 w-full">
-            <div className="relative w-full sm:max-w-xl lg:max-w-2xl space-y-3 sm:space-y-6">
+          <div className="relative flex justify-center lg:justify-end mt-4 max-[380px]:mt-2 sm:mt-8 lg:mt-0 w-full">
+            <div className="relative w-full max-w-none sm:max-w-xl lg:max-w-2xl space-y-2.5 sm:space-y-6 -mx-3 sm:mx-0">
               <div className="absolute -inset-1 bg-gradient-to-r from-[#0ea5e9]/30 to-[#10b981]/30 rounded-2xl blur-lg opacity-60" />
 
               {hasHeroVideo && (
-                <div className="relative rounded-2xl overflow-hidden border border-[#1a2f4a] shadow-2xl bg-[#050d1a]">
+                <div className="relative rounded-lg sm:rounded-2xl overflow-hidden border border-[#1a2f4a] shadow-2xl bg-[#050d1a]">
                   <video
                     src={heroVideoSrc}
                     autoPlay
@@ -89,7 +90,7 @@ function HeroSection() {
                 </div>
               )}
 
-              <div className="relative rounded-2xl overflow-hidden border border-[#1a2f4a] shadow-2xl bg-black">
+              <div className="relative rounded-lg sm:rounded-2xl overflow-hidden border border-[#1a2f4a] shadow-2xl bg-black">
                 <img
                   src={heroImageSrc}
                   alt="GMX Audit Security Dashboard"
@@ -118,13 +119,13 @@ function TrustBand() {
   ];
 
   return (
-    <section className="border-y border-[#1a2f4a] bg-[#030810] py-3 sm:py-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-12">
+    <section className="border-y border-[#1a2f4a] bg-[#030810] py-4 sm:py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 md:gap-12">
           {labels.map((item, i) => (
             <div key={i} className="flex items-center gap-1.5 sm:gap-2 text-[#475569] hover:text-[#64748b] transition-colors">
               <span className="text-[#1a2f4a]">{item.icon}</span>
-              <span className="text-[11px] sm:text-xs font-medium tracking-wider uppercase">{item.label}</span>
+              <span className="text-xs sm:text-xs font-medium tracking-wider uppercase">{item.label}</span>
             </div>
           ))}
         </div>
@@ -168,9 +169,9 @@ function WhatWeOffer() {
   ];
 
   return (
-    <section id="services" className="py-16 sm:py-20 lg:py-24 bg-[#050d1a]">
+    <section id="services" className="py-12 sm:py-20 lg:py-24 bg-[#050d1a]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mb-10 sm:mb-14">
+        <div className="max-w-2xl mb-8 sm:mb-14">
           <p className="text-[#0ea5e9] text-xs font-semibold uppercase tracking-wider mb-3">What We Offer</p>
           <h2 className="text-[1.85rem] sm:text-4xl font-bold text-white mb-3 sm:mb-4">
             Continuous monitoring and engineering assurance
@@ -840,6 +841,7 @@ export default function Landing({ onNavigate }: LandingProps) {
 
   return (
     <>
+      <Navbar currentPage="home" onNavigate={onNavigate} />
       <HeroSection />
       <TrustBand />
       <WhatWeOffer />

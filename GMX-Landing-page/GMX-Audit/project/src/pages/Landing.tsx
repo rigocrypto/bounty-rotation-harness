@@ -80,7 +80,7 @@ function HeroSection() {
                     playsInline
                     controls
                     onError={() => setHasHeroVideo(false)}
-                    className="w-full aspect-[9/16] sm:aspect-[4/3] lg:aspect-[16/9] object-cover"
+                    className="w-full h-auto aspect-[9/16] sm:aspect-[4/3] lg:aspect-[16/9] object-contain bg-black"
                   />
                   <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#050d1a]/40 via-transparent to-transparent" />
                   <div className="absolute top-3 left-3 bg-[#0ea5e9] text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase">
@@ -89,11 +89,11 @@ function HeroSection() {
                 </div>
               )}
 
-              <div className="relative rounded-2xl overflow-hidden border border-[#1a2f4a] shadow-2xl">
+              <div className="relative rounded-2xl overflow-hidden border border-[#1a2f4a] shadow-2xl bg-black">
                 <img
                   src={heroImageSrc}
                   alt="GMX Audit Security Dashboard"
-                  className="w-full aspect-[9/16] sm:aspect-[4/3] lg:aspect-[16/9] object-cover"
+                  className="w-full h-auto aspect-[9/16] sm:aspect-[4/3] lg:aspect-[16/9] object-contain"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050d1a]/60 via-transparent to-transparent" />
               </div>

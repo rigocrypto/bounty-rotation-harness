@@ -92,6 +92,8 @@ function HeroSection() {
 }
 
 function DashboardProofSection() {
+  const heroVideoSrc = `${import.meta.env.BASE_URL}hero-preview.mp4`;
+  const heroImageSrc = `${import.meta.env.BASE_URL}Bounty-rotation.jpeg`;
   const sectionRef = useRef<HTMLElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -118,6 +120,29 @@ function DashboardProofSection() {
       <div className="mx-auto w-full max-w-4xl">
         <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">See It In Action</p>
         <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Real-time Security Monitoring</h2>
+
+        <div className="mt-6 space-y-4">
+          <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/70">
+            <video
+              className="w-full"
+              src={heroVideoSrc}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={heroImageSrc}
+            />
+          </div>
+          <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/70">
+            <img
+              className="w-full"
+              src={heroImageSrc}
+              alt="GMX Audit dashboard preview"
+              loading="lazy"
+            />
+          </div>
+        </div>
 
         <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-4 sm:p-6">
           {isVisible ? (

@@ -43,7 +43,7 @@ function HeroSection() {
   ];
 
   return (
-    <section id="hero" className="min-h-screen bg-slate-950 px-4 pb-12 pt-24 sm:px-6 sm:pt-28 lg:pt-32">
+    <section id="hero" className="min-h-screen bg-slate-950 px-4 pb-4 pt-24 sm:px-6 sm:pb-8 sm:pt-28 lg:pt-32">
       <div className="mx-auto w-full max-w-5xl">
         <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 sm:p-8">
           <p className="inline-flex rounded-full border border-cyan-500/40 bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-300">
@@ -116,12 +116,12 @@ function DashboardProofSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-slate-950 px-4 py-12 sm:px-6">
+    <section ref={sectionRef} className="bg-slate-950 px-4 pb-12 pt-4 sm:px-6 sm:pt-6">
       <div className="mx-auto w-full max-w-4xl">
         <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">See It In Action</p>
         <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Real-time Security Monitoring</h2>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-4 space-y-4">
           <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/70">
             <video
               className="w-full"

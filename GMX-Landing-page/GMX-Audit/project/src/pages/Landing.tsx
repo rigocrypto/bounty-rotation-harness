@@ -69,8 +69,8 @@ function HeroSection() {
             </div>
           </div>
 
-          <div className="relative lg:flex justify-end hidden">
-            <div className="relative w-full max-w-lg space-y-6">
+          <div className="relative flex justify-center lg:justify-end mt-10 lg:mt-0">
+            <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg space-y-6">
               <div className="absolute -inset-1 bg-gradient-to-r from-[#0ea5e9]/30 to-[#10b981]/30 rounded-2xl blur-lg opacity-60" />
 
               {hasHeroVideo && (
@@ -83,7 +83,7 @@ function HeroSection() {
                     playsInline
                     controls
                     onError={() => setHasHeroVideo(false)}
-                    className="w-full h-auto object-cover"
+                    className="w-full max-h-64 sm:max-h-80 lg:max-h-none h-auto object-cover"
                   />
                   <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#050d1a]/40 via-transparent to-transparent" />
                   <div className="absolute top-3 left-3 bg-[#0ea5e9] text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase">
@@ -96,7 +96,7 @@ function HeroSection() {
                 <img
                   src={heroImageSrc}
                   alt="GMX Audit Security Dashboard"
-                  className="w-full h-auto object-cover"
+                  className="w-full max-h-64 sm:max-h-80 lg:max-h-none h-auto object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050d1a]/60 via-transparent to-transparent" />
               </div>

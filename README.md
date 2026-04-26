@@ -1,4 +1,4 @@
-﻿# GMX Audit Control Center
+# GMX Audit Control Center
 
 ![GMX Audit Logo](docs/assets/GMX-AUDITS-LOGO.jpeg)
 
@@ -9,6 +9,9 @@ GMX Audit Control Center is a deterministic security suite for Web3 protocols fo
 [![Bounty Rotation](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/bounty-rotation.yml/badge.svg?branch=main)](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/bounty-rotation.yml)
 [![Audit Batch CI](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/audit-batch.yml/badge.svg?branch=main)](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/audit-batch.yml)
 [![Secret Scan](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/secret-scan.yml/badge.svg?branch=main)](https://github.com/rigocrypto/bounty-rotation-harness/actions/workflows/secret-scan.yml)
+
+**Live Landing Page:** [https://rigocrypto.github.io/bounty-rotation-harness/](https://rigocrypto.github.io/bounty-rotation-harness/)
+
 
 **Managed plan (Growth $499/mo):** [Checkout on Stripe](https://buy.stripe.com/fZu9AT3Np2Sp48l4NygnK00)
 
@@ -430,3 +433,4 @@ Basic onboarding is typically same-day when archive RPC access is ready.
 ---
 
 > Advisory note: AI-assisted outputs are advisory and require human review. This suite does not guarantee exploit detection and is not a substitute for a full manual audit.
+

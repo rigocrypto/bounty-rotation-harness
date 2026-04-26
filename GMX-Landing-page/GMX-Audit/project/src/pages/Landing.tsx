@@ -24,7 +24,7 @@ function HeroSection() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 max-[380px]:gap-2 sm:gap-8 lg:gap-12 items-start lg:items-center py-1 max-[380px]:py-0 sm:py-14 lg:py-24 justify-center lg:justify-start">
-          <div className="w-full lg:max-w-xl flex flex-col items-center lg:items-start px-4 sm:px-0">
+          <div className="w-full lg:max-w-xl flex flex-col items-center lg:items-start">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0ea5e9]/10 border border-[#0ea5e9]/30 text-[#0ea5e9] text-xs font-medium mb-2 sm:mb-6 uppercase tracking-wider">
               <Activity className="w-3 h-3" />
               Security Monitoring &amp; Engineering Operations

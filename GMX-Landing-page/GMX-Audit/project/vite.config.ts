@@ -1,8 +1,11 @@
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
+import React from 'react';
+import { renderToString } from 'react-dom/server';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import Landing from './src/pages/Landing';
 import { DEFAULT_LOCALE, LOCALE_BUNDLES, SUPPORTED_LOCALES, type LocaleCode } from './src/i18n/locales';
 
 const SITE_URL = 'https://rigocrypto.github.io/bounty-rotation-harness';
@@ -65,8 +68,10 @@ function prerenderLocaleHtml(html: string, locale: LocaleCode): string {
   const meta = LOCALE_BUNDLES[locale].meta;
   const ogLocale = meta.languageTag.replace('-', '_');
   const localeHref = localeUrl(locale);
+  const localeBodyHtml = renderToString(React.createElement(Landing, { locale, onNavigate: () => {} }));
 
   const localized = html
+    .replace(/\s*<link rel="alternate" hreflang="[^"]+" href="[^"]+" \/>\s*/g, '\n')
     .replace(/<html lang="[^"]+">/, `<html lang="${meta.languageTag}">`)
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(meta.title)}</title>`)
     .replace(/<meta\s+name="description"\s+content="[\s\S]*?"\s*\/>/, `<meta name="description" content="${escapeHtml(meta.description)}" />`)
@@ -77,7 +82,8 @@ function prerenderLocaleHtml(html: string, locale: LocaleCode): string {
     .replace(/<meta\s+name="twitter:title"\s+content="[\s\S]*?"\s*\/>/, `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`)
     .replace(/<meta\s+name="twitter:description"\s+content="[\s\S]*?"\s*\/>/, `<meta name="twitter:description" content="${escapeHtml(meta.description)}" />`)
     .replace(/<link\s+rel="canonical"\s+href="[\s\S]*?"\s*\/>/, `<link rel="canonical" href="${localeHref}" />`)
-    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, `<script type="application/ld+json">\n${localizedJsonLd(locale)}\n    </script>`);
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, `<script type="application/ld+json">\n${localizedJsonLd(locale)}\n    </script>`)
+    .replace('<div id="root"></div>', `<div id="root">${localeBodyHtml}</div>`);
 
   return localized.replace('</head>', `    ${alternateLinks()}\n  </head>`);
 }

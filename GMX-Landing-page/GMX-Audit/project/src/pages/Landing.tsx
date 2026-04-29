@@ -287,6 +287,10 @@ const LANDING_CONTENT: Record<LocaleCode, any> = {
   },
 };
 
+function getBaseUrl(): string {
+  return (import.meta as ImportMeta & { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
+}
+
 function HeroSection({ content }: { content: any }) {
   const trustItems = [
     {
@@ -356,8 +360,9 @@ function HeroSection({ content }: { content: any }) {
 }
 
 function DashboardProofSection({ content }: { content: any }) {
-  const heroVideoSrc = `${import.meta.env.BASE_URL}hero-preview.mp4`;
-  const heroImageSrc = `${import.meta.env.BASE_URL}Bounty-rotation.jpeg`;
+  const baseUrl = getBaseUrl();
+  const heroVideoSrc = `${baseUrl}hero-preview.mp4`;
+  const heroImageSrc = `${baseUrl}Bounty-rotation.jpeg`;
   const sectionRef = useRef<HTMLElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
@@ -941,6 +946,7 @@ function getLegalRouteFromHash(hash: string): LegalPageType | null {
 }
 
 export default function Landing({ onNavigate, locale }: LandingProps) {
+  const baseUrl = getBaseUrl();
   const content = LANDING_CONTENT[locale];
   const [legalPage, setLegalPage] = useState<LegalPageType | null>(() =>
     typeof window === 'undefined' ? null : getLegalRouteFromHash(window.location.hash)
@@ -982,11 +988,11 @@ export default function Landing({ onNavigate, locale }: LandingProps) {
         <section className="bg-slate-950 px-4 pt-20 sm:px-6">
           <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-2 text-xs text-slate-300">
             <span className="text-slate-400">{content.languageLabel}</span>
-            <a className={locale === 'en' ? 'font-semibold text-cyan-400' : 'hover:text-white'} href={`${import.meta.env.BASE_URL}en/`}>EN</a>
+            <a className={locale === 'en' ? 'font-semibold text-cyan-400' : 'hover:text-white'} href={`${baseUrl}en/`}>EN</a>
             <span>/</span>
-            <a className={locale === 'es' ? 'font-semibold text-cyan-400' : 'hover:text-white'} href={`${import.meta.env.BASE_URL}es/`}>ES</a>
+            <a className={locale === 'es' ? 'font-semibold text-cyan-400' : 'hover:text-white'} href={`${baseUrl}es/`}>ES</a>
             <span>/</span>
-            <a className={locale === 'fr' ? 'font-semibold text-cyan-400' : 'hover:text-white'} href={`${import.meta.env.BASE_URL}fr/`}>FR</a>
+            <a className={locale === 'fr' ? 'font-semibold text-cyan-400' : 'hover:text-white'} href={`${baseUrl}fr/`}>FR</a>
           </div>
         </section>
         <HeroSection content={content} />

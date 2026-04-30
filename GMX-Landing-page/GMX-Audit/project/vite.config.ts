@@ -8,7 +8,7 @@ import react from '@vitejs/plugin-react';
 import Landing from './src/pages/Landing';
 import { DEFAULT_LOCALE, LOCALE_BUNDLES, SUPPORTED_LOCALES, type LocaleCode } from './src/i18n/locales';
 
-const SITE_URL = 'https://rigocrypto.github.io/bounty-rotation-harness';
+const SITE_URL = 'https://rigocrypto.github.io/GMX-Audit';
 
 function localeUrl(locale: LocaleCode): string {
   return `${SITE_URL}/${locale}/`;
@@ -108,7 +108,7 @@ function localePrerenderPlugin(): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: process.env.GITHUB_ACTIONS ? '/bounty-rotation-harness/' : '/',
+  base: process.env.GITHUB_ACTIONS ? '/GMX-Audit/' : '/',
   plugins: [react(), localePrerenderPlugin()],
   optimizeDeps: {
     exclude: ['lucide-react'],
